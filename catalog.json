@@ -1,0 +1,1458 @@
+{
+  "$schemaNote": "One cartridge-manifest-shaped entry per game, validated against the real, published @red-cup-engineering/cartridge's validateManifest by test/smoke.test.mts (full strict validation when cartridgeWrapped is true, an honest subset check otherwise). A field this catalog can't fill in yet is omitted, never set to null. status, statusNote, repoPath, cartridgeWrapped, energyBankWrapped, and shelf are storefront-only extensions, not part of the manifest spec.",
+  "generated": "2026-09-14",
+  "games": [
+    {
+      "id": "solitaire",
+      "displayName": "Solitaire",
+      "description": "One rules engine, variant rules as data: Klondike, FreeCell, Spider (1/2/4-suit), Yukon, Forty Thieves, Golf, TriPeaks, and Pyramid all read from the same declarative VariantSpec, with deterministic seeded deals, a solver-certified FreeCell deal generator, and a move-log that doubles as undo/redo and replay source.",
+      "subdomain": "solitaire",
+      "configs": [
+        {
+          "id": "klondike-draw1",
+          "displayName": "Klondike (Draw 1)",
+          "params": {
+            "decks": 1,
+            "suitsInPlay": 4,
+            "drawCount": 1
+          }
+        },
+        {
+          "id": "klondike-draw3",
+          "displayName": "Klondike (Draw 3)",
+          "params": {
+            "decks": 1,
+            "suitsInPlay": 4,
+            "drawCount": 3
+          }
+        },
+        {
+          "id": "freecell",
+          "displayName": "FreeCell",
+          "params": {
+            "decks": 1,
+            "suitsInPlay": 4
+          }
+        },
+        {
+          "id": "spider-1suit",
+          "displayName": "Spider (1 Suit)",
+          "params": {
+            "decks": 2,
+            "suitsInPlay": 1
+          }
+        },
+        {
+          "id": "spider-2suit",
+          "displayName": "Spider (2 Suit)",
+          "params": {
+            "decks": 2,
+            "suitsInPlay": 2
+          }
+        },
+        {
+          "id": "spider-4suit",
+          "displayName": "Spider (4 Suit)",
+          "params": {
+            "decks": 2,
+            "suitsInPlay": 4
+          }
+        },
+        {
+          "id": "yukon",
+          "displayName": "Yukon",
+          "params": {
+            "decks": 1,
+            "suitsInPlay": 4
+          }
+        },
+        {
+          "id": "forty-thieves",
+          "displayName": "Forty Thieves",
+          "params": {
+            "decks": 2,
+            "suitsInPlay": 4,
+            "drawCount": 1
+          }
+        },
+        {
+          "id": "golf",
+          "displayName": "Golf",
+          "params": {
+            "decks": 1,
+            "suitsInPlay": 4
+          }
+        },
+        {
+          "id": "tripeaks",
+          "displayName": "TriPeaks",
+          "params": {
+            "decks": 1,
+            "suitsInPlay": 4
+          }
+        },
+        {
+          "id": "pyramid",
+          "displayName": "Pyramid",
+          "params": {
+            "decks": 1,
+            "suitsInPlay": 4
+          }
+        }
+      ],
+      "entryPoints": {
+        "browser": "/"
+      },
+      "seedPolicy": {
+        "kind": "daily-utc"
+      },
+      "intentLog": {
+        "schemaVersion": "solitaire-cartridge-v1",
+        "schemaRef": "src/cartridge.mts#SolitaireIntent"
+      },
+      "replayVerifier": "src/cartridge.manifest.mts#verify",
+      "keywords": [
+        "klondike",
+        "freecell",
+        "spider",
+        "yukon",
+        "solitaire",
+        "card-game"
+      ],
+      "status": "playable",
+      "energyBankWrapped": false,
+      "shelf": "Card Table",
+      "cartridgeWrapped": true,
+      "hostname": "solitaire.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/solitaire.play.561.group"
+    },
+    {
+      "id": "gambling-trainer",
+      "displayName": "Kelly's Wager",
+      "description": "A daily-seeded, practice-bankroll trainer for expected value, variance, and Kelly-criterion sizing. Every offer is graded against the real Kelly optimum, adversarially-framed traps are labeled honestly by the numbers even when the pitch lies, and every spend is typed on screen as freely reversible, priced, or terminal. Earn-only: no real currency ever enters or leaves.",
+      "subdomain": "gambling-trainer",
+      "configs": [
+        {
+          "id": "novice",
+          "displayName": "Novice — 6 wagers, gentle traps",
+          "params": {
+            "offerCount": 6,
+            "trapRate": 0.3
+          }
+        },
+        {
+          "id": "sharp",
+          "displayName": "Sharp — 10 wagers, frequent traps",
+          "params": {
+            "offerCount": 10,
+            "trapRate": 0.5
+          }
+        }
+      ],
+      "entryPoints": {
+        "browser": "/"
+      },
+      "seedPolicy": {
+        "kind": "daily-utc"
+      },
+      "intentLog": {
+        "schemaVersion": "gambling-trainer-cartridge-v1",
+        "schemaRef": "src/cartridge.mts#WagerIntent"
+      },
+      "replayVerifier": "src/manifest.mts#verify",
+      "keywords": [
+        "kelly-criterion",
+        "bankroll-management",
+        "expected-value",
+        "daily-puzzle",
+        "practice-bankroll"
+      ],
+      "status": "playable",
+      "statusNote": "Practice bankroll only -- no real currency, no energy-bank settlement (see DESIGN.md).",
+      "energyBankWrapped": false,
+      "shelf": "Card Table",
+      "cartridgeWrapped": true,
+      "hostname": "gambling-trainer.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/gambling-trainer.play.561.group"
+    },
+    {
+      "id": "flickering-delve",
+      "displayName": "Flickering Delve",
+      "description": "An idle-roguelike where the real game is writing the standing-order program that plays the descent for you.",
+      "subdomain": "flickering",
+      "entryPoints": {
+        "browser": "/",
+        "headless": "POST /session, POST /input, GET /stream (JSON-over-HTTP + SSE; no browser required)"
+      },
+      "seedPolicy": {
+        "kind": "on-demand"
+      },
+      "intentLog": {
+        "schemaVersion": "flickering-delve-cartridge-v1"
+      },
+      "keywords": [
+        "idle-roguelike",
+        "feltos",
+        "procedural-generation",
+        "automation",
+        "lisp",
+        "dungeon-crawler"
+      ],
+      "status": "playable",
+      "energy": {
+        "hooksRef": "src/ledger.mts (real double-entry ledger; not yet wrapped as EnergyHooks)",
+        "accountNamespace": "flickering-delve"
+      },
+      "energyBankWrapped": false,
+      "cartridgeWrapped": false,
+      "shelf": "Puzzle Den",
+      "statusNote": "Cartridge layer (src/cartridge.mts) was removed as unconsumed; game runs on src/ledger.mts directly. Re-wrap when a real replayVerifier export exists again.",
+      "hostname": "flickering.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/flickering.play.561.group"
+    },
+    {
+      "id": "onestone",
+      "displayName": "TileSlots",
+      "description": "A serious match-3 whose differentiator is the tessellation itself — one tiling-agnostic graph engine playing square, hex, and rhombille boards, climbing toward aperiodic tilings.",
+      "subdomain": "onestone",
+      "configs": [
+        {
+          "id": "1",
+          "displayName": "Square · Level 1",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 30
+          }
+        },
+        {
+          "id": "2",
+          "displayName": "Square · Level 2",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 29
+          }
+        },
+        {
+          "id": "3",
+          "displayName": "Square · Level 3",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 29
+          }
+        },
+        {
+          "id": "4",
+          "displayName": "Square · Level 4",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 28
+          }
+        },
+        {
+          "id": "5",
+          "displayName": "Square · Level 5",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 27
+          }
+        },
+        {
+          "id": "6",
+          "displayName": "Square · Level 6",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 27
+          }
+        },
+        {
+          "id": "7",
+          "displayName": "Square · Level 7",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 26
+          }
+        },
+        {
+          "id": "8",
+          "displayName": "Square · Level 8",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 26
+          }
+        },
+        {
+          "id": "9",
+          "displayName": "Square · Level 9",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 25
+          }
+        },
+        {
+          "id": "10",
+          "displayName": "Square · Level 10",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 24
+          }
+        },
+        {
+          "id": "11",
+          "displayName": "Square · Level 11",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 24
+          }
+        },
+        {
+          "id": "12",
+          "displayName": "Square · Level 12",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 23
+          }
+        },
+        {
+          "id": "13",
+          "displayName": "Square · Level 13",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 22
+          }
+        },
+        {
+          "id": "14",
+          "displayName": "Square · Level 14",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 22
+          }
+        },
+        {
+          "id": "15",
+          "displayName": "Square · Level 15",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 21
+          }
+        },
+        {
+          "id": "16",
+          "displayName": "Square · Level 16",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 21
+          }
+        },
+        {
+          "id": "17",
+          "displayName": "Square · Level 17",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 20
+          }
+        },
+        {
+          "id": "18",
+          "displayName": "Square · Level 18",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 19
+          }
+        },
+        {
+          "id": "19",
+          "displayName": "Square · Level 19",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 19
+          }
+        },
+        {
+          "id": "20",
+          "displayName": "Square · Level 20",
+          "params": {
+            "tiling": "square",
+            "chapter": 0,
+            "moves": 18
+          }
+        },
+        {
+          "id": "21",
+          "displayName": "Hex · Level 1",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 30
+          }
+        },
+        {
+          "id": "22",
+          "displayName": "Hex · Level 2",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 29
+          }
+        },
+        {
+          "id": "23",
+          "displayName": "Hex · Level 3",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 29
+          }
+        },
+        {
+          "id": "24",
+          "displayName": "Hex · Level 4",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 28
+          }
+        },
+        {
+          "id": "25",
+          "displayName": "Hex · Level 5",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 27
+          }
+        },
+        {
+          "id": "26",
+          "displayName": "Hex · Level 6",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 27
+          }
+        },
+        {
+          "id": "27",
+          "displayName": "Hex · Level 7",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 26
+          }
+        },
+        {
+          "id": "28",
+          "displayName": "Hex · Level 8",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 26
+          }
+        },
+        {
+          "id": "29",
+          "displayName": "Hex · Level 9",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 25
+          }
+        },
+        {
+          "id": "30",
+          "displayName": "Hex · Level 10",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 24
+          }
+        },
+        {
+          "id": "31",
+          "displayName": "Hex · Level 11",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 24
+          }
+        },
+        {
+          "id": "32",
+          "displayName": "Hex · Level 12",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 23
+          }
+        },
+        {
+          "id": "33",
+          "displayName": "Hex · Level 13",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 22
+          }
+        },
+        {
+          "id": "34",
+          "displayName": "Hex · Level 14",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 22
+          }
+        },
+        {
+          "id": "35",
+          "displayName": "Hex · Level 15",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 21
+          }
+        },
+        {
+          "id": "36",
+          "displayName": "Hex · Level 16",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 21
+          }
+        },
+        {
+          "id": "37",
+          "displayName": "Hex · Level 17",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 20
+          }
+        },
+        {
+          "id": "38",
+          "displayName": "Hex · Level 18",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 19
+          }
+        },
+        {
+          "id": "39",
+          "displayName": "Hex · Level 19",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 19
+          }
+        },
+        {
+          "id": "40",
+          "displayName": "Hex · Level 20",
+          "params": {
+            "tiling": "hex",
+            "chapter": 1,
+            "moves": 18
+          }
+        },
+        {
+          "id": "41",
+          "displayName": "Rhombille · Level 1",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 30
+          }
+        },
+        {
+          "id": "42",
+          "displayName": "Rhombille · Level 2",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 29
+          }
+        },
+        {
+          "id": "43",
+          "displayName": "Rhombille · Level 3",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 29
+          }
+        },
+        {
+          "id": "44",
+          "displayName": "Rhombille · Level 4",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 28
+          }
+        },
+        {
+          "id": "45",
+          "displayName": "Rhombille · Level 5",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 27
+          }
+        },
+        {
+          "id": "46",
+          "displayName": "Rhombille · Level 6",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 27
+          }
+        },
+        {
+          "id": "47",
+          "displayName": "Rhombille · Level 7",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 26
+          }
+        },
+        {
+          "id": "48",
+          "displayName": "Rhombille · Level 8",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 26
+          }
+        },
+        {
+          "id": "49",
+          "displayName": "Rhombille · Level 9",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 25
+          }
+        },
+        {
+          "id": "50",
+          "displayName": "Rhombille · Level 10",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 24
+          }
+        },
+        {
+          "id": "51",
+          "displayName": "Rhombille · Level 11",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 24
+          }
+        },
+        {
+          "id": "52",
+          "displayName": "Rhombille · Level 12",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 23
+          }
+        },
+        {
+          "id": "53",
+          "displayName": "Rhombille · Level 13",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 22
+          }
+        },
+        {
+          "id": "54",
+          "displayName": "Rhombille · Level 14",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 22
+          }
+        },
+        {
+          "id": "55",
+          "displayName": "Rhombille · Level 15",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 21
+          }
+        },
+        {
+          "id": "56",
+          "displayName": "Rhombille · Level 16",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 21
+          }
+        },
+        {
+          "id": "57",
+          "displayName": "Rhombille · Level 17",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 20
+          }
+        },
+        {
+          "id": "58",
+          "displayName": "Rhombille · Level 18",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 19
+          }
+        },
+        {
+          "id": "59",
+          "displayName": "Rhombille · Level 19",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 19
+          }
+        },
+        {
+          "id": "60",
+          "displayName": "Rhombille · Level 20",
+          "params": {
+            "tiling": "rhombille",
+            "chapter": 2,
+            "moves": 18
+          }
+        }
+      ],
+      "entryPoints": {
+        "browser": "/",
+        "headless": "POST /session, POST /input, GET /stream (JSON-over-HTTP + SSE; no browser required)"
+      },
+      "seedPolicy": {
+        "kind": "on-demand"
+      },
+      "intentLog": {
+        "schemaVersion": "onestone-cartridge-v1",
+        "schemaRef": "src/cartridge.mts#OnestoneIntent"
+      },
+      "replayVerifier": "src/cartridge.manifest.mts#verify",
+      "keywords": [
+        "match-3",
+        "tessellation",
+        "puzzle",
+        "aperiodic-tiling",
+        "graph-engine"
+      ],
+      "status": "playable",
+      "energy": {
+        "hooksRef": "src/ledger.mts (real double-entry ledger, a documented near-verbatim port of flickering-delve's; not yet wrapped as EnergyHooks)",
+        "accountNamespace": "onestone"
+      },
+      "energyBankWrapped": false,
+      "shelf": "Puzzle Den",
+      "cartridgeWrapped": true,
+      "hostname": "onestone.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/onestone.play.561.group"
+    },
+    {
+      "id": "crucible",
+      "displayName": "Crucible",
+      "description": "A daily-seeded settling puzzle where every move is a deterministic, replayable transformation of a reaction network and its measured obstruction cost.",
+      "subdomain": "crucible",
+      "entryPoints": {
+        "browser": "/web/index.html"
+      },
+      "seedPolicy": {
+        "kind": "daily-utc"
+      },
+      "intentLog": {
+        "schemaVersion": "crucible-cartridge-v1",
+        "schemaRef": "src/cartridge.mts#CrucibleIntent"
+      },
+      "replayVerifier": "src/manifest.mts#verify",
+      "keywords": [
+        "obstruction-theory",
+        "daily-puzzle",
+        "cohomology",
+        "settling",
+        "waidan",
+        "puzzle"
+      ],
+      "status": "playable",
+      "energyBankWrapped": false,
+      "shelf": "Puzzle Den",
+      "cartridgeWrapped": true,
+      "hostname": "crucible.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/crucible.play.561.group"
+    },
+    {
+      "id": "stoke",
+      "displayName": "Stoke",
+      "description": "The kind incremental: the player builds a real production graph, and prestige is not an authored curve — it is the dominant Perron-Frobenius eigenvalue of the player's actual production matrix, computed by real linear algebra, with the prestige loadout literally the eigenvector. Every displayed number is tagged computed-from-your-graph or designed-flavor; the game never blends the two without saying so.",
+      "subdomain": "stoke",
+      "entryPoints": {
+        "browser": "/"
+      },
+      "seedPolicy": {
+        "kind": "on-demand"
+      },
+      "intentLog": {
+        "schemaVersion": "stoke-cartridge-v1",
+        "schemaRef": "src/intents.mts#StokeIntent"
+      },
+      "replayVerifier": "src/cartridge.manifest.mts#verify",
+      "keywords": [
+        "idle-game",
+        "incremental",
+        "perron-frobenius",
+        "kind-incremental",
+        "honest-numbers"
+      ],
+      "status": "playable",
+      "energyBankWrapped": false,
+      "shelf": "Puzzle Den",
+      "cartridgeWrapped": true,
+      "hostname": "stoke.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/stoke.play.561.group"
+    },
+    {
+      "id": "lantern",
+      "displayName": "Lantern",
+      "description": "A digital garden and knowledge vault, gamified: a wing of your own notes compiles into a walkable map, lit room by room as FSRS-lite spaced repetition keeps each fact fresh in memory.",
+      "subdomain": "lantern",
+      "entryPoints": {
+        "browser": "/",
+        "headless": "src/srs.mts (pure module export: reviewCard(state, grade, now) importable directly, no server needed)"
+      },
+      "seedPolicy": {
+        "kind": "on-demand"
+      },
+      "seedPolicyNote": "No seed is actually consumed -- SRS state is not seed-derived. 'on-demand' is the closest-fit placeholder; see spec section 1.2's Lantern fit note.",
+      "intentLog": {
+        "schemaVersion": "lantern-v1"
+      },
+      "status": "playable",
+      "statusNote": "No seed, no ledger -- the 'cartridge without an economy' case the spec names explicitly.",
+      "energyBankWrapped": false,
+      "cartridgeWrapped": false,
+      "keywords": [
+        "spaced-repetition",
+        "knowledge-garden",
+        "srs",
+        "fsrs",
+        "study",
+        "digital-garden"
+      ],
+      "shelf": "Study",
+      "hostname": "lantern.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/lantern.play.561.group"
+    },
+    {
+      "id": "weiqi",
+      "displayName": "Weiqi",
+      "description": "A pure, dependency-free weiqi (Go) rules kernel -- five rulesets, SGF round-tripping, a semantic event layer -- paired with a real, tested client-side web app: Play (Capture Go vs. a scripted bot), Learn (interactive lesson player), and Read (compiled glossary). A competitive real-time/correspondence Play service against other humans is still declared, not built.",
+      "subdomain": "weiqi",
+      "entryPoints": {
+        "browser": "/",
+        "headless": "apps/weiqi-kernel/src/index.mts (pure module export, no server needed)"
+      },
+      "entryPointsNote": "Deployed to weiqi.561.group (Cloud Run service \"weiqi\", static apps/weiqi-web/public served via scripts/serve.mjs -- PORT/HOST honor the Cloud Run convention). npm run build && npm run serve inside apps/weiqi-web still serves the identical Play/Learn/Tsumego/Read pages locally at http://localhost:8080/ for development.",
+      "seedPolicy": {
+        "kind": "on-demand"
+      },
+      "seedPolicyNote": "The bot-play Capture Go mode has no seed policy of its own (the bot is a deterministic pure function of board state, not a seed); no Play-vs-human service exists yet to fix a daily/client-supplied seed policy.",
+      "intentLog": {
+        "schemaVersion": "weiqi-v1"
+      },
+      "status": "playable",
+      "statusNote": "Polish-phase pass (2026-08-20): gradient/shadow/sheen stone rendering, shape-coded ko/last-move markers, a magnifier-and-cancel touch flow, live concept-recognition toasts with hover-card glossary links, and an SRS-scheduled tsumego trainer are real and tested (168/168). Honest gaps, not yet built: no captured-stones tray or live score display; a territory/ownership-heatmap renderer exists in board.mjs but is not wired to any live page; one wood board theme; no move-number-on-stone option. A competitive real-time/correspondence Play service against other humans is still declared, not built.",
+      "energyBankWrapped": false,
+      "cartridgeWrapped": false,
+      "keywords": [
+        "go",
+        "weiqi",
+        "board-game",
+        "rules-kernel",
+        "tsumego",
+        "sgf",
+        "capture-go"
+      ],
+      "shelf": "Study",
+      "repoPath": "lib/emsenn/services/561-group/services/science-services-section/services/philosophy-services-section/services/relationality-services-section/services/agency-services-section/services/being-services-section/services/doing-services-section/services/playing-services-section/services/gaming-services-section/services/board-games-services-section/services/weiqi-services-section"
+    },
+    {
+      "id": "ruinfold",
+      "displayName": "Ruinfold",
+      "description": "A seeded-daily roguelike: everyone descends the same keep within a 24-hour UTC window, risking a five-way bilattice death model, for a leaderboard place and a satoshi payout or a gear boon for next week.",
+      "subdomain": "ruinfold",
+      "entryPoints": {
+        "browser": "/play",
+        "headless": "GET /daily[?date=], POST /runs, GET /leaderboard/:date, GET /replay/:runId, GET /boons/:player (JSON-over-HTTP; no browser required)"
+      },
+      "seedPolicy": {
+        "kind": "daily-utc"
+      },
+      "intentLog": {
+        "schemaVersion": "ruinfold-v1"
+      },
+      "status": "playable",
+      "energyBankWrapped": false,
+      "cartridgeWrapped": false,
+      "keywords": [
+        "roguelike",
+        "daily-seed",
+        "bilattice",
+        "dungeon",
+        "leaderboard"
+      ],
+      "shelf": "Deep",
+      "hostname": "ruinfold.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/ruinfold.play.561.group"
+    },
+    {
+      "id": "durante",
+      "displayName": "durante",
+      "description": "A QUAKE-like first-person shooter on @red-cup-engineering/abrash whose arena is the federated merge of two traces (a contested wall is a phase gate), whose weapon's effect is evidence you fold, and whose demon is held alive-AND-dead between your first wound and the kill. The daily tournament seeds one arena per UTC day (daily.mjs#dailySeed) that AI and human players both reach through the same intent-log submission route — peers by construction, labeled honestly.",
+      "subdomain": "durante",
+      "entryPoints": {
+        "browser": "/",
+        "headless": "scripts/durante-terminal.mjs"
+      },
+      "seedPolicy": {
+        "kind": "daily-utc"
+      },
+      "intentLog": {
+        "schemaVersion": "durante-run/1",
+        "schemaRef": "src/run-recorder.mjs#encodeRun"
+      },
+      "replayVerifier": "src/manifest.mjs#verify",
+      "keywords": [
+        "game",
+        "fps",
+        "quake-like",
+        "first-person-shooter",
+        "raycaster",
+        "pixel",
+        "federation",
+        "paraconsistent",
+        "bilattice",
+        "held-contradiction",
+        "561-group",
+        "browser",
+        "daily-tournament"
+      ],
+      "status": "playable",
+      "energyBankWrapped": false,
+      "shelf": "unshelved",
+      "cartridgeWrapped": true,
+      "hostname": "durante.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/durante.play.561.group"
+    },
+    {
+      "id": "farstone",
+      "displayName": "Farstone",
+      "description": "A walkable, 58-room New England harbor town built on FeltOS, carried live by QwzSpace, and rendered as a calm TUFTE interface. Exits, neighbors, evidence, weather, and exact-name commands all come from the same persistent world.",
+      "subdomain": "farstone",
+      "hostname": "farstone.561.group",
+      "entryPoints": {
+        "browser": "/",
+        "headless": "POST /connect, POST /command, POST /tick, GET /events?actor=, GET /metrics (JSON-over-HTTP), plus QwzSpace WebSocket at /"
+      },
+      "seedPolicy": {
+        "kind": "on-demand"
+      },
+      "intentLog": {
+        "schemaVersion": "farstone-v1"
+      },
+      "status": "playable",
+      "statusNote": "The harbor sleeps between visits and catches up in bounded steps on requests; every settled mutation is flushed to persistent storage.",
+      "energyBankWrapped": false,
+      "cartridgeWrapped": false,
+      "keywords": [
+        "mud",
+        "text-adventure",
+        "harbor",
+        "feltos",
+        "qwzspace",
+        "tufte",
+        "persistent-world",
+        "rest-api",
+        "headless"
+      ],
+      "shelf": "Deep",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/farstone.561.group"
+    },
+    {
+      "id": "aletheon",
+      "displayName": "Aletheon",
+      "description": "A browser 3D fantasy MMORPG built on QwzSpace: a hand-rolled RFC 6455 WebSocket server running a 15Hz tick loop, with real combat, claim altars, an illocutionary speech-act system (assert/deny/abstain/contest), marks, K4-gauge powers, and an economy, over a four-valued bilattice world-truth model.",
+      "subdomain": "aletheon",
+      "hostname": "aletheon.561.group",
+      "entryPoints": {
+        "browser": "/"
+      },
+      "seedPolicy": {
+        "kind": "on-demand"
+      },
+      "intentLog": {
+        "schemaVersion": "aletheon-v1"
+      },
+      "status": "playable",
+      "statusNote": "Known limitation: marks and inventory mutate state directly and do not survive a restore. (Event-log compaction and the sustained-traffic OOM crash-loop this used to note were fixed and verified live 2026-08-20 -- see the deploy runbook's Known open issues.)",
+      "energyBankWrapped": false,
+      "cartridgeWrapped": false,
+      "keywords": [
+        "mmorpg",
+        "3d",
+        "bilattice",
+        "websocket",
+        "combat",
+        "illocution",
+        "real-time"
+      ],
+      "shelf": "unshelved",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/aletheon.561.group"
+    },
+    {
+      "id": "be-not-so-fearful",
+      "displayName": "Be Not So Fearful",
+      "description": "A backrooms/SCP-inspired extraction shooter on @red-cup-engineering/abrash: OG-Wolfenstein-grade raycast graphics, Quake-grade momentum physics (a BNSF-owned kernel composing abrash's real collision.move — bunnyhop speed gain, rocket-jump verticality, both numerically tested) over seeded backrooms-liminal levels whose contested (⊤) walls — abrash's own held-contradiction mechanic — shiver as the dread signal. Four anomalies, each a learnable, tested behavior contract (watched vs unwatched, sound through walls, territory, an unconditional toll). Loot is banked only on an explicit extraction at a beacon; unbanked loot is simply never counted on death — what you carry is what you can lose.",
+      "subdomain": "fearful",
+      "entryPoints": {
+        "browser": "/",
+        "headless": "src/cartridge.mts"
+      },
+      "seedPolicy": {
+        "kind": "client-supplied"
+      },
+      "intentLog": {
+        "schemaVersion": "bnsf-run/1"
+      },
+      "replayVerifier": "src/manifest.mts#verify",
+      "keywords": [
+        "game",
+        "fps",
+        "extraction-shooter",
+        "backrooms",
+        "scp",
+        "quake-like",
+        "raycaster",
+        "momentum",
+        "bunnyhop",
+        "rocket-jump",
+        "561-group",
+        "browser",
+        "federation",
+        "paraconsistent",
+        "bilattice"
+      ],
+      "status": "playable",
+      "statusNote": "Live-playtested: banked loot survives death, unbanked loot is forfeited. Known thinness: content volume is still small and there is no audio yet.",
+      "energyBankWrapped": false,
+      "shelf": "Puzzle Den",
+      "cartridgeWrapped": true,
+      "hostname": "fearful.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/fearful.play.561.group"
+    },
+    {
+      "id": "blackjack",
+      "displayName": "Blackjack",
+      "description": "A 6-deck shoe, dealer stands on soft 17, blackjack pays 3:2, double/split/late-surrender all in play. Real chip stakes through the house economy (buy in with tickets, wager chips, a jackpot rake on every bet) — and an optional \"House Math\" panel that computes the exact expected value of standing, hitting, doubling, and splitting against the table’s own live shoe composition, on request, never a static strategy card. No real money in or out, ever.",
+      "subdomain": "casino",
+      "configs": [
+        {
+          "id": "default",
+          "displayName": "Blackjack (S17)",
+          "params": {
+            "hitSoft17": false
+          }
+        },
+        {
+          "id": "h17",
+          "displayName": "Blackjack (H17)",
+          "params": {
+            "hitSoft17": true
+          }
+        }
+      ],
+      "entryPoints": {
+        "browser": "/blackjack.html"
+      },
+      "seedPolicy": {
+        "kind": "client-supplied"
+      },
+      "intentLog": {
+        "schemaVersion": "blackjack-cartridge-v1",
+        "schemaRef": "src/games/blackjack/engine.mts#BlackjackIntent"
+      },
+      "replayVerifier": "src/games/blackjack/manifest.mts#verify",
+      "energy": {
+        "hooksRef": "src/games/blackjack/table.mts#BlackjackTable",
+        "accountNamespace": "casino"
+      },
+      "keywords": [
+        "blackjack",
+        "card-table",
+        "shoe",
+        "expected-value",
+        "house-math",
+        "chips",
+        "jackpot-rake",
+        "cartridge"
+      ],
+      "serviceId": "casino",
+      "status": "playable",
+      "energyBankWrapped": true,
+      "shelf": "Card Table",
+      "cartridgeWrapped": true,
+      "hostname": "casino.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/casino.play.561.group/src/games/blackjack"
+    },
+    {
+      "id": "chutes",
+      "displayName": "Chutes & Ladders",
+      "description": "The classic 100-square race, as a board-as-graph: a chute and a ladder are one \"jump\" edge, distinguished only by direction. 1-4 players, any mix of humans and bots — and the bots are not opponents with a strategy, because there is no strategy in this game: a \"bot\" is a die with a seating position. While the race runs, the exact probability distribution of how many more turns each player needs is computed live and shown on screen. Daily-seeded: the same day produces the same race for everyone. No economy, no spend — pure chance.",
+      "subdomain": "parlor",
+      "configs": [
+        {
+          "id": "human,bot",
+          "displayName": "1 player vs. 1 bot",
+          "params": {
+            "players": 2
+          }
+        },
+        {
+          "id": "human,bot,bot",
+          "displayName": "1 player vs. 2 bots",
+          "params": {
+            "players": 3
+          }
+        },
+        {
+          "id": "human,bot,bot,bot",
+          "displayName": "1 player vs. 3 bots",
+          "params": {
+            "players": 4
+          }
+        },
+        {
+          "id": "bot,bot,bot,bot",
+          "displayName": "4 bots race each other",
+          "params": {
+            "players": 4
+          }
+        }
+      ],
+      "entryPoints": {
+        "browser": "/chutes/"
+      },
+      "seedPolicy": {
+        "kind": "daily-utc"
+      },
+      "intentLog": {
+        "schemaVersion": "chutes-cartridge-v1",
+        "schemaRef": "src/games/chutes/engine.mts#applyIntent"
+      },
+      "replayVerifier": "src/games/chutes/manifest.mts#verify",
+      "keywords": [
+        "chutes-and-ladders",
+        "board-race",
+        "board-as-graph",
+        "daily-puzzle",
+        "pure-chance",
+        "no-strategy"
+      ],
+      "serviceId": "parlor",
+      "status": "playable",
+      "energyBankWrapped": false,
+      "shelf": "Card Table",
+      "cartridgeWrapped": true,
+      "hostname": "parlor.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/parlor.play.561.group/src/games/chutes"
+    },
+    {
+      "id": "equivo",
+      "displayName": "Equivo",
+      "description": "Learn mathematics by measuring obstruction: every answer is checked by the real @lenticule-science/metrologic engine, so a wrong answer's diagnosis names the actually-computed structural fact, never a canned string. Room-gated units, honest single-shot spaced-repetition review, and four lenses on one mathematics (the fourth honestly absent rather than fabricated).",
+      "subdomain": "equivo",
+      "entryPoints": {
+        "browser": "/"
+      },
+      "seedPolicy": {
+        "kind": "on-demand"
+      },
+      "cartridgeWrapped": false,
+      "status": "playable",
+      "statusNote": "Live with Unit 1 (The Descent: 7 rooms, 30 exercises, a ~30-minute arc). Kernel 163 tests, web face 43. Real: obstruction checking via @lenticule-science/metrologic, FSRS-lite review scheduling, gate-vs-review grading distinction, lens rendering with honest Lakotaean absence. Not yet: any unit past Unit 1; richer answer-input forms (distinguish/relate are free-text).",
+      "shelf": "Study",
+      "intentLog": {
+        "schemaVersion": "none-v0"
+      },
+      "keywords": [
+        "mathematics",
+        "education",
+        "obstruction",
+        "spaced-repetition",
+        "equivalence",
+        "bilattice"
+      ],
+      "hostname": "equivo.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/equivo.play.561.group"
+    },
+    {
+      "id": "farkle",
+      "displayName": "Farkle",
+      "description": "Dice-set scoring, hot dice, and a real chance to bust the whole turn. First to 10000 wins (500 to get on the board). Every roll-or-bank decision shows the computed bust probability and expected value of rolling again. Earn-only, practice scorekeeping only.",
+      "subdomain": "parlor",
+      "entryPoints": {
+        "browser": "/farkle/"
+      },
+      "seedPolicy": {
+        "kind": "daily-utc"
+      },
+      "intentLog": {
+        "schemaVersion": "farkle-cartridge-v1",
+        "schemaRef": "src/games/farkle/engine.mts#FarkleIntent"
+      },
+      "replayVerifier": "src/games/farkle/manifest.mts#verify",
+      "keywords": [
+        "farkle",
+        "dice-game",
+        "hot-dice",
+        "expected-value",
+        "daily-puzzle",
+        "earn-only"
+      ],
+      "serviceId": "parlor",
+      "status": "playable",
+      "energyBankWrapped": false,
+      "shelf": "Card Table",
+      "cartridgeWrapped": true,
+      "hostname": "parlor.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/parlor.play.561.group/src/games/farkle"
+    },
+    {
+      "id": "pig",
+      "displayName": "Pig",
+      "description": "Hold-or-roll, first to 100. Every roll-or-hold decision shows the computed bust probability and expected value of rolling again — the teaching surface, not an afterthought. Earn-only, practice scorekeeping only: no wagering, nothing staked.",
+      "subdomain": "parlor",
+      "entryPoints": {
+        "browser": "/pig/"
+      },
+      "seedPolicy": {
+        "kind": "daily-utc"
+      },
+      "intentLog": {
+        "schemaVersion": "pig-cartridge-v1",
+        "schemaRef": "src/games/pig/engine.mts#PigIntent"
+      },
+      "replayVerifier": "src/games/pig/manifest.mts#verify",
+      "keywords": [
+        "pig",
+        "dice-game",
+        "hold-or-roll",
+        "expected-value",
+        "daily-puzzle",
+        "earn-only"
+      ],
+      "serviceId": "parlor",
+      "status": "playable",
+      "energyBankWrapped": false,
+      "shelf": "Card Table",
+      "cartridgeWrapped": true,
+      "hostname": "parlor.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/parlor.play.561.group/src/games/pig"
+    },
+    {
+      "id": "reels",
+      "displayName": "Fair Spin",
+      "description": "A 3-reel practice slot that inverts the genre: computed RTP, exact per-symbol hit odds, and expected loss per 100 spins are shown permanently on the machine face, never behind a click. Practice bankroll only — no real currency ever enters or leaves. Every action is typed on screen as freely reversible or terminal, and a running session summary compares your actual spins against the published distribution.",
+      "subdomain": "parlor",
+      "configs": [
+        {
+          "id": "default",
+          "displayName": "Fair Spin (practice)",
+          "params": {
+            "startingBankroll": 100,
+            "minBet": 1,
+            "maxBet": 10
+          }
+        }
+      ],
+      "entryPoints": {
+        "browser": "/reels/"
+      },
+      "seedPolicy": {
+        "kind": "daily-utc"
+      },
+      "intentLog": {
+        "schemaVersion": "reels-cartridge-v1",
+        "schemaRef": "src/games/reels/engine.mts#applyIntent"
+      },
+      "replayVerifier": "src/games/reels/manifest.mts#verify",
+      "keywords": [
+        "slot-machine",
+        "practice-bankroll",
+        "published-odds",
+        "rtp",
+        "no-dark-patterns",
+        "earn-only"
+      ],
+      "serviceId": "parlor",
+      "status": "playable",
+      "energyBankWrapped": false,
+      "shelf": "Card Table",
+      "cartridgeWrapped": true,
+      "hostname": "parlor.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/parlor.play.561.group/src/games/reels"
+    },
+    {
+      "id": "slots",
+      "displayName": "Tideline Treasures",
+      "description": "A 5-reel, 3-row, 20-payline video slot — wilds, a scatter-triggered (and retriggerable) free-spin bonus at 2x payouts, and a progressive jackpot fed by the house's shared pool. Exact reel RTP 49.08%, exact free-spin contribution +45.09%, overall 94.17% — computed by full-grid enumeration over 1,048,576 equally-likely reel-stop combinations, never asserted. Jackpot odds: 1 in 1,048,576, exact. Real chip stakes through the house economy (buy in with tickets, wager chips, a jackpot rake on every spin) — and an optional \"House Math\" panel disclosing every figure above, on request. No real money in or out, ever.",
+      "subdomain": "casino",
+      "configs": [
+        {
+          "id": "default",
+          "displayName": "Tideline Treasures",
+          "params": {
+            "reels": 5,
+            "rows": 3,
+            "paylines": 20
+          }
+        }
+      ],
+      "entryPoints": {
+        "browser": "/slots.html"
+      },
+      "seedPolicy": {
+        "kind": "client-supplied"
+      },
+      "intentLog": {
+        "schemaVersion": "slots-cartridge-v1",
+        "schemaRef": "src/games/slots/engine.mts#SlotsIntent"
+      },
+      "replayVerifier": "src/games/slots/manifest.mts#verify",
+      "energy": {
+        "hooksRef": "src/games/slots/table.mts#SlotsTable",
+        "accountNamespace": "casino"
+      },
+      "keywords": [
+        "slots",
+        "video-slot",
+        "wild",
+        "scatter",
+        "free-spins",
+        "progressive-jackpot",
+        "house-math",
+        "chips",
+        "jackpot-rake",
+        "cartridge",
+        "tideline-treasures"
+      ],
+      "serviceId": "casino",
+      "status": "playable",
+      "energyBankWrapped": true,
+      "shelf": "Card Table",
+      "cartridgeWrapped": true,
+      "hostname": "casino.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/casino.play.561.group/src/games/slots"
+    },
+    {
+      "id": "yacht",
+      "displayName": "Yacht",
+      "description": "5 dice, up to 3 rolls a turn, 12 standard categories. Every category shows its exact score if you commit now and its exact expected value if you reroll once more, live, recomputed after every roll and every hold. Earn-only, practice scorekeeping only.",
+      "subdomain": "parlor",
+      "entryPoints": {
+        "browser": "/yacht/"
+      },
+      "seedPolicy": {
+        "kind": "daily-utc"
+      },
+      "intentLog": {
+        "schemaVersion": "yacht-cartridge-v1",
+        "schemaRef": "src/games/yacht/engine.mts#YachtIntent"
+      },
+      "replayVerifier": "src/games/yacht/manifest.mts#verify",
+      "keywords": [
+        "yacht",
+        "dice-game",
+        "category-scoring",
+        "expected-value",
+        "daily-puzzle",
+        "earn-only"
+      ],
+      "serviceId": "parlor",
+      "status": "playable",
+      "energyBankWrapped": false,
+      "shelf": "Card Table",
+      "cartridgeWrapped": true,
+      "hostname": "parlor.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/parlor.play.561.group/src/games/yacht"
+    },
+    {
+      "id": "you-are-conscious",
+      "displayName": "You Are Conscious",
+      "description": "The idleclicker where the widget production graph is Stoke's, and the ladder you climb over it is a consciousness ladder: click makes widget, and each of ten automation tiers is a genuine cognitive capability, taught through a mechanic you operate, never a lecture box. The paperclip joke is told straight and then made to hurt exactly once, honestly, at the self-model tier.",
+      "subdomain": "you-are-conscious",
+      "entryPoints": {
+        "browser": "/"
+      },
+      "seedPolicy": {
+        "kind": "on-demand"
+      },
+      "intentLog": {
+        "schemaVersion": "you-are-conscious-cartridge-v1",
+        "schemaRef": "src/intents.mts#ConsciousIntent"
+      },
+      "replayVerifier": "src/cartridge.manifest.mts#verify",
+      "keywords": [
+        "idle-game",
+        "incremental",
+        "interactive-fiction",
+        "kind-incremental",
+        "honest-numbers",
+        "goodhart"
+      ],
+      "status": "playable",
+      "energyBankWrapped": false,
+      "shelf": "Puzzle Den",
+      "cartridgeWrapped": true,
+      "hostname": "you-are-conscious.play.561.group",
+      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/you-are-conscious.play.561.group"
+    }
+  ]
+}

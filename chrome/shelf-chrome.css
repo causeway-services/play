@@ -1,0 +1,93 @@
+/* shelf-chrome.css — the 561 shelf's shared frame ("the modern card back").
+   Canonical source. Every game vendors a byte-identical copy per house doctrine (vendor a
+   copy, not a live cross-service import) — see chrome/README.md for the vendoring recipe and
+   the per-game provenance-header convention.
+
+   Scope, deliberately small: this file owns only the THINGS THE WHOLE SHELF SHARES — the
+   header's shelf mark, the "part of the 561 shelf" footer line, a type scale for chrome text,
+   focus-visible, and reduced-motion. It does NOT own each game's page background, panel
+   color, or body font — those stay each game's own (--bg/--ink/--panel-bg/--accent or
+   equivalent), so the shelf reads as one house with many felts, not one reskin stamped over
+   every table. Every --shelf-* token below falls back to that game's own token first, and
+   only then to a neutral house default (the crucible / gambling-trainer "card back" palette,
+   the two newest, best-converged faces at vendoring time) — so a game that already has
+   --accent/--ink-dim/--border defined inherits them for free, and one that has none (a plain
+   template-literal client) still renders correctly off the defaults alone. */
+
+:root {
+  --shelf-font: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  --shelf-size-sm: 0.78rem;
+  --shelf-size-base: 0.85rem;
+  --shelf-radius: 8px;
+
+  --shelf-bg: var(--bg, #f6f3ee);
+  --shelf-ink: var(--ink, #1c1a17);
+  --shelf-ink-dim: var(--ink-dim, var(--text-dim, #6b665e));
+  --shelf-border: var(--border, #d8d2c6);
+  --shelf-accent: var(--accent, #a3402a);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --shelf-bg: var(--bg, #171512);
+    --shelf-ink: var(--ink, #ece7de);
+    --shelf-ink-dim: var(--ink-dim, var(--text-dim, #a39c8f));
+    --shelf-border: var(--border, #3a352d);
+    --shelf-accent: var(--accent, #e08a5c);
+  }
+}
+
+:root[data-theme="dark"] {
+  --shelf-bg: var(--bg, #171512);
+  --shelf-ink: var(--ink, #ece7de);
+  --shelf-ink-dim: var(--ink-dim, var(--text-dim, #a39c8f));
+  --shelf-border: var(--border, #3a352d);
+  --shelf-accent: var(--accent, #e08a5c);
+}
+
+/* ---------- the shelf mark (header) ---------- */
+/* A subtle house glyph next to the game's own title — never the loudest thing in the header.
+   Same <svg> paths as play.561.group's own .mark, at chrome scale. */
+.shelf-mark {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
+  color: var(--shelf-accent);
+  opacity: 0.65;
+  vertical-align: -0.15rem;
+}
+.shelf-mark:hover, .shelf-mark:focus-visible { opacity: 1; }
+
+/* ---------- the "part of the 561 shelf" footer line ---------- */
+.shelf-footer-line {
+  font-family: var(--shelf-font);
+  font-size: var(--shelf-size-sm);
+  color: var(--shelf-ink-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+}
+.shelf-footer-line .shelf-mark { width: 0.85rem; height: 0.85rem; }
+.shelf-footer-line a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--shelf-border);
+  text-underline-offset: 2px;
+  border-radius: 3px;
+}
+.shelf-footer-line a:hover { color: var(--shelf-accent); text-decoration-color: var(--shelf-accent); }
+
+/* ---------- focus-visible (chrome elements only — never overrides a game's own ring) ---------- */
+.shelf-mark:focus-visible,
+.shelf-footer-line a:focus-visible {
+  outline: 2px solid var(--shelf-accent);
+  outline-offset: 2px;
+  text-decoration: none;
+}
+
+/* ---------- reduced-motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .shelf-mark, .shelf-footer-line a { transition: none !important; }
+}

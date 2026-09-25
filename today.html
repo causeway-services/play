@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Today -- play.561.group</title>
+  <meta name="description" content="The 561 shelf's shared daily ritual: one strip per game with a real daily seed, today's identity, and a straight link in to play it." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23a3402a'/%3E%3Ctext x='12' y='17' font-family='monospace' font-size='13' fill='%23fff8f4' text-anchor='middle'%3E561%3C/text%3E%3C/svg%3E" />
+  <script type="importmap">
+  {
+    "imports": {
+      "@red-cup-engineering/web-page-tiling-engine": "./node_modules/@red-cup-engineering/web-page-tiling-engine/src/render-tufte-document.mjs",
+      "@red-cup-engineering/web-page-tiling-engine/browser": "./node_modules/@red-cup-engineering/web-page-tiling-engine/src/tufte-browser.mjs",
+      "@red-cup-engineering/cartridge/seed": "./node_modules/@red-cup-engineering/cartridge/src/seed.mjs"
+    }
+  }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#today-list">Skip to today's games</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <svg class="mark" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <ellipse cx="24" cy="24" rx="18" ry="11"/>
+        <path d="M13 17q11-6 22 0" stroke-width="1.3" opacity="0.6"/>
+        <path d="M11 24 14.25 21.5 17.5 24 20.75 21.5 24 24 27.25 21.5 30.5 24 33.75 21.5 37 24"/>
+      </svg>
+      <div class="title-block">
+        <h1>today<span class="domain">.561.group</span></h1>
+        <p class="tagline">
+          The suite's front door: today's date resolves to one seed per game, the same
+          seed for everyone, everywhere, at once. Not a browsing catalog -- that's
+          <a href="index.html">the shelf</a> -- this page is the daily ritual: what does
+          today ask, and where do you go to answer it.
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="today-toolbar">
+      <p class="result-count" id="today-date" aria-live="polite">Computing today's UTC date&hellip;</p>
+      <button type="button" id="today-refresh">Check for updates</button>
+    </div>
+
+    <!-- Rendered by build.mjs from a real build-time UTC date via TUFTE's
+         renderTufteFragment, so a no-JS visitor still sees real, working strips instead of
+         an empty list. js/today.mjs always recomputes against the visitor's own real "now"
+         on load and replaces this with it -- the build-time date is never trusted as
+         authoritative, only as an honest starting point. -->
+    <div class="today-list-wrap" id="today-list" role="region" aria-label="Today's live daily games"><div class="tufte-grid"><section class="tufte-tile" id="ruinfold" data-role="rail" data-lifecycle="present" data-confidence="low" data-side="center" style="--tile-span:4" aria-labelledby="ruinfold-title"><header><h2 id="ruinfold-title">Ruinfold</h2></header><div class="tufte-tile-body">
+    <div class="strip-head">
+      <span class="card-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+    <path d="M5 21V9l3-4h8l3 4v12"/>
+    <path d="M5 9h14"/>
+    <path d="M9 21v-6h6v6"/>
+    <path d="M9 5v4M15 5v4"/>
+  </svg></span>
+      <span class="badge playable">Live daily</span>
+    </div>
+    <p class="strip-ask">Descend today&#39;s 4-floor keep and risk the five-way bilattice death, for a place on today&#39;s leaderboard.</p>
+    <p class="strip-seed"><span class="seed-label">Today&#39;s seed</span> <code>0x860bc51e</code></p>
+    <div class="strip-links">
+      <span class="play-link" aria-disabled="true">Not yet deployed -- run it locally</span>
+      <a class="dev-link" href="http://localhost:8787/play">http://localhost:8787/play <span class="dev-hint">(local dev)</span></a>
+    </div>
+  </div></section><section class="tufte-tile" id="crucible" data-role="rail" data-lifecycle="present" data-confidence="low" data-side="center" style="--tile-span:4" aria-labelledby="crucible-title"><header><h2 id="crucible-title">Crucible</h2></header><div class="tufte-tile-body">
+    <div class="strip-head">
+      <span class="card-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+    <circle cx="6" cy="7" r="2"/>
+    <circle cx="18" cy="7" r="2"/>
+    <circle cx="12" cy="17" r="2"/>
+    <path d="M8 7h8M7.3 8.7 10.7 15.3M16.7 8.7 13.3 15.3"/>
+  </svg></span>
+      <span class="badge playable">Live daily</span>
+    </div>
+    <p class="strip-ask">Settle today&#39;s tangle to zero-H¹ -- merge, split, rebond, catalyze -- before the furnace energy runs out.</p>
+    <p class="strip-seed"><span class="seed-label">Today&#39;s seed</span> <code>crucible-daily:2026-09-14</code></p>
+    <div class="strip-links">
+      <span class="play-link" aria-disabled="true">Not yet deployed -- run it locally</span>
+      <a class="dev-link" href="http://localhost:8787/web/index.html">http://localhost:8787/web/index.html <span class="dev-hint">(local dev)</span></a>
+    </div>
+  </div></section><section class="tufte-tile" id="solitaire" data-role="rail" data-lifecycle="present" data-confidence="low" data-side="center" style="--tile-span:4" aria-labelledby="solitaire-title"><header><h2 id="solitaire-title">Solitaire</h2></header><div class="tufte-tile-body">
+    <div class="strip-head">
+      <span class="card-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+    <rect x="4" y="7" width="9" height="13" rx="1.3" transform="rotate(-8 8.5 13.5)"/>
+    <rect x="10.5" y="5" width="9" height="13" rx="1.3"/>
+    <circle cx="15" cy="11.5" r="1.4"/>
+  </svg></span>
+      <span class="badge playable">Live daily</span>
+    </div>
+    <p class="strip-ask">Today&#39;s solver-certified deal -- pick Klondike, FreeCell, or Spider, everyone gets the same shuffle.</p>
+    <p class="strip-seed"><span class="seed-label">Today&#39;s seed (Klondike Draw-1)</span> <code>solitaire-daily:klondike-draw1:2026-09-14</code></p>
+    <div class="strip-links">
+      <span class="play-link" aria-disabled="true">Not yet deployed -- run it locally</span>
+      <a class="dev-link" href="http://localhost:8787/web/table.html?variant=klondike-draw1&amp;daily=1">http://localhost:8787/web/table.html?variant=klondike-draw1&amp;daily=1 <span class="dev-hint">(local dev)</span></a>
+    </div>
+  </div></section><section class="tufte-tile" id="gambling-trainer" data-role="rail" data-lifecycle="present" data-confidence="low" data-side="center" style="--tile-span:4" aria-labelledby="gambling-trainer-title"><header><h2 id="gambling-trainer-title">Kelly&#39;s Wager</h2></header><div class="tufte-tile-body">
+    <div class="strip-head">
+      <span class="card-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+    <circle cx="12" cy="12" r="8.5"/>
+    <path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3M6.5 6.5l2 2M15.5 15.5l2 2M17.5 6.5l-2 2M6.5 17.5l2-2"/>
+  </svg></span>
+      <span class="badge playable">Live daily</span>
+    </div>
+    <p class="strip-ask">Today&#39;s practice bankroll run -- grade every stake against the real Kelly optimum, novice track.</p>
+    <p class="strip-seed"><span class="seed-label">Today&#39;s seed</span> <code>gambling-trainer-daily:novice:2026-09-14</code></p>
+    <div class="strip-links">
+      <span class="play-link" aria-disabled="true">Not yet deployed -- run it locally</span>
+      <a class="dev-link" href="http://localhost:8787/web/index.html">http://localhost:8787/web/index.html <span class="dev-hint">(local dev)</span></a>
+    </div>
+  </div></section><section class="tufte-tile" id="durante" data-role="rail" data-lifecycle="present" data-confidence="low" data-side="center" style="--tile-span:4" aria-labelledby="durante-title"><header><h2 id="durante-title">Durante</h2></header><div class="tufte-tile-body">
+    <div class="strip-head">
+      <span class="card-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+  <rect x="4" y="4" width="16" height="16" rx="3"/>
+  <circle cx="9" cy="9" r="1" fill="currentColor" stroke="none"/>
+  <circle cx="15" cy="15" r="1" fill="currentColor" stroke="none"/>
+</svg></span>
+      <span class="badge playable">Live daily</span>
+    </div>
+    <p class="strip-ask">Today&#39;s seeded arena -- walk the maze, shoot the demons, land on today&#39;s leaderboard next to anyone (human or agent) who played the same seed.</p>
+    <p class="strip-seed"><span class="seed-label">Today&#39;s seed</span> <code>0x7fc7626d</code></p>
+    <div class="strip-links">
+      <span class="play-link" aria-disabled="true">Not yet deployed -- run it locally</span>
+      <a class="dev-link" href="http://localhost:8787/">http://localhost:8787/ <span class="dev-hint">(local dev)</span></a>
+    </div>
+  </div></section><section class="tufte-tile" id="pig" data-role="rail" data-lifecycle="present" data-confidence="low" data-side="center" style="--tile-span:4" aria-labelledby="pig-title"><header><h2 id="pig-title">Pig</h2></header><div class="tufte-tile-body">
+    <div class="strip-head">
+      <span class="card-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+  <rect x="4" y="4" width="16" height="16" rx="3"/>
+  <circle cx="9" cy="9" r="1" fill="currentColor" stroke="none"/>
+  <circle cx="15" cy="15" r="1" fill="currentColor" stroke="none"/>
+</svg></span>
+      <span class="badge playable">Live daily</span>
+    </div>
+    <p class="strip-ask">Today&#39;s hold-or-roll game — use the live expected value to decide when to bank.</p>
+    <p class="strip-seed"><span class="seed-label">Today&#39;s seed</span> <code>parlor:pig-daily:2026-09-14</code></p>
+    <div class="strip-links">
+      <span class="play-link" aria-disabled="true">Not yet deployed -- run it locally</span>
+      <a class="dev-link" href="http://localhost:8787/web/pig/">http://localhost:8787/web/pig/ <span class="dev-hint">(local dev)</span></a>
+    </div>
+  </div></section><section class="tufte-tile" id="farkle" data-role="rail" data-lifecycle="present" data-confidence="low" data-side="center" style="--tile-span:4" aria-labelledby="farkle-title"><header><h2 id="farkle-title">Farkle</h2></header><div class="tufte-tile-body">
+    <div class="strip-head">
+      <span class="card-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+  <rect x="4" y="4" width="16" height="16" rx="3"/>
+  <circle cx="9" cy="9" r="1" fill="currentColor" stroke="none"/>
+  <circle cx="15" cy="15" r="1" fill="currentColor" stroke="none"/>
+</svg></span>
+      <span class="badge playable">Live daily</span>
+    </div>
+    <p class="strip-ask">Today&#39;s hot-dice run — bank a turn or risk the real bust probability.</p>
+    <p class="strip-seed"><span class="seed-label">Today&#39;s seed</span> <code>parlor:farkle-daily:2026-09-14</code></p>
+    <div class="strip-links">
+      <span class="play-link" aria-disabled="true">Not yet deployed -- run it locally</span>
+      <a class="dev-link" href="http://localhost:8787/web/farkle/">http://localhost:8787/web/farkle/ <span class="dev-hint">(local dev)</span></a>
+    </div>
+  </div></section><section class="tufte-tile" id="yacht" data-role="rail" data-lifecycle="present" data-confidence="low" data-side="center" style="--tile-span:4" aria-labelledby="yacht-title"><header><h2 id="yacht-title">Yacht</h2></header><div class="tufte-tile-body">
+    <div class="strip-head">
+      <span class="card-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+  <rect x="4" y="4" width="16" height="16" rx="3"/>
+  <circle cx="9" cy="9" r="1" fill="currentColor" stroke="none"/>
+  <circle cx="15" cy="15" r="1" fill="currentColor" stroke="none"/>
+</svg></span>
+      <span class="badge playable">Live daily</span>
+    </div>
+    <p class="strip-ask">Today&#39;s five-dice game — commit a category or use its exact reroll expectation.</p>
+    <p class="strip-seed"><span class="seed-label">Today&#39;s seed</span> <code>parlor:yacht-daily:2026-09-14</code></p>
+    <div class="strip-links">
+      <span class="play-link" aria-disabled="true">Not yet deployed -- run it locally</span>
+      <a class="dev-link" href="http://localhost:8787/web/yacht/">http://localhost:8787/web/yacht/ <span class="dev-hint">(local dev)</span></a>
+    </div>
+  </div></section><section class="tufte-tile" id="chutes" data-role="rail" data-lifecycle="present" data-confidence="low" data-side="center" style="--tile-span:4" aria-labelledby="chutes-title"><header><h2 id="chutes-title">Chutes &amp; Ladders</h2></header><div class="tufte-tile-body">
+    <div class="strip-head">
+      <span class="card-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+  <rect x="4" y="4" width="16" height="16" rx="3"/>
+  <circle cx="9" cy="9" r="1" fill="currentColor" stroke="none"/>
+  <circle cx="15" cy="15" r="1" fill="currentColor" stroke="none"/>
+</svg></span>
+      <span class="badge playable">Live daily</span>
+    </div>
+    <p class="strip-ask">Today&#39;s shared race — every player gets the same board and exact finish-turn distribution.</p>
+    <p class="strip-seed"><span class="seed-label">Today&#39;s seed</span> <code>parlor:chutes-daily:human,bot:2026-09-14</code></p>
+    <div class="strip-links">
+      <span class="play-link" aria-disabled="true">Not yet deployed -- run it locally</span>
+      <a class="dev-link" href="http://localhost:8787/web/chutes/">http://localhost:8787/web/chutes/ <span class="dev-hint">(local dev)</span></a>
+    </div>
+  </div></section><section class="tufte-tile" id="reels" data-role="rail" data-lifecycle="present" data-confidence="low" data-side="center" style="--tile-span:4" aria-labelledby="reels-title"><header><h2 id="reels-title">Fair Spin</h2></header><div class="tufte-tile-body">
+    <div class="strip-head">
+      <span class="card-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+  <rect x="4" y="4" width="16" height="16" rx="3"/>
+  <circle cx="9" cy="9" r="1" fill="currentColor" stroke="none"/>
+  <circle cx="15" cy="15" r="1" fill="currentColor" stroke="none"/>
+</svg></span>
+      <span class="badge playable">Live daily</span>
+    </div>
+    <p class="strip-ask">Today&#39;s practice reels — published RTP and session loss stay visible throughout.</p>
+    <p class="strip-seed"><span class="seed-label">Today&#39;s seed</span> <code>parlor:reels-daily:default:2026-09-14</code></p>
+    <div class="strip-links">
+      <span class="play-link" aria-disabled="true">Not yet deployed -- run it locally</span>
+      <a class="dev-link" href="http://localhost:8787/web/reels/">http://localhost:8787/web/reels/ <span class="dev-hint">(local dev)</span></a>
+    </div>
+  </div></section></div></div>
+
+    <p class="today-footnote">
+      Only games with a <code>daily-utc</code> seed policy get a strip here. The rest of
+      the catalog is <code>on-demand</code> -- no daily ritual of its own. See the
+      <a href="catalog.json">full catalog</a> for every game.
+    </p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>
+        Every seed above is computed in your own browser from the real UTC clock --
+        never hand-typed for one day and left to go stale. See
+        <a href="js/today.mjs">js/today.mjs</a> for the ported (not imported) formulas,
+        each one headed with the real source file it matches.
+      </p>
+      <p>
+        <a href="index.html">&larr; Back to the shelf</a>
+      </p>
+    </div>
+  </footer>
+
+  <script type="module" src="js/today.mjs"></script>
+</body>
+</html>
