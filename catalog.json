@@ -849,38 +849,6 @@
       "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/stoke.play.561.group"
     },
     {
-      "id": "lantern",
-      "displayName": "Lantern",
-      "description": "A digital garden and knowledge vault, gamified: a wing of your own notes compiles into a walkable map, lit room by room as FSRS-lite spaced repetition keeps each fact fresh in memory.",
-      "subdomain": "lantern",
-      "entryPoints": {
-        "browser": "/",
-        "headless": "src/srs.mts (pure module export: reviewCard(state, grade, now) importable directly, no server needed)"
-      },
-      "seedPolicy": {
-        "kind": "on-demand"
-      },
-      "seedPolicyNote": "No seed is actually consumed -- SRS state is not seed-derived. 'on-demand' is the closest-fit placeholder; see spec section 1.2's Lantern fit note.",
-      "intentLog": {
-        "schemaVersion": "lantern-v1"
-      },
-      "status": "playable",
-      "statusNote": "No seed, no ledger -- the 'cartridge without an economy' case the spec names explicitly.",
-      "energyBankWrapped": false,
-      "cartridgeWrapped": false,
-      "keywords": [
-        "spaced-repetition",
-        "knowledge-garden",
-        "srs",
-        "fsrs",
-        "study",
-        "digital-garden"
-      ],
-      "shelf": "Study",
-      "hostname": "lantern.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/lantern.play.561.group"
-    },
-    {
       "id": "weiqi",
       "displayName": "Weiqi",
       "description": "A pure, dependency-free weiqi (Go) rules kernel -- five rulesets, SGF round-tripping, a semantic event layer -- paired with a real, tested client-side web app: Play (Capture Go vs. a scripted bot), Learn (interactive lesson player), and Read (compiled glossary). A competitive real-time/correspondence Play service against other humans is still declared, not built.",
