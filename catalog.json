@@ -1174,7 +1174,7 @@
     {
       "id": "equivo",
       "displayName": "Equivo",
-      "description": "Learn mathematics by measuring obstruction: every answer is checked by the real @lenticule-science/metrologic engine, so a wrong answer's diagnosis names the actually-computed structural fact, never a canned string. Room-gated units, honest single-shot spaced-repetition review, and four lenses on one mathematics (the fourth honestly absent rather than fabricated).",
+      "description": "Learn mathematics by measuring obstruction: every answer is checked by the real @red-cup-engineering/metrologic engine, so a wrong answer's diagnosis names the actually-computed structural fact, never a canned string. Room-gated units, honest single-shot spaced-repetition review, and four lenses on one mathematics (the fourth honestly absent rather than fabricated).",
       "subdomain": "equivo",
       "entryPoints": {
         "browser": "/"
@@ -1184,7 +1184,7 @@
       },
       "cartridgeWrapped": false,
       "status": "playable",
-      "statusNote": "Live with Unit 1 (The Descent: 7 rooms, 30 exercises, a ~30-minute arc). Kernel 163 tests, web face 43. Real: obstruction checking via @lenticule-science/metrologic, FSRS-lite review scheduling, gate-vs-review grading distinction, lens rendering with honest Lakotaean absence. Not yet: any unit past Unit 1; richer answer-input forms (distinguish/relate are free-text).",
+      "statusNote": "Live with Unit 1 (The Descent: 7 rooms, 30 exercises, a ~30-minute arc). Kernel 163 tests, web face 43. Real: obstruction checking via @red-cup-engineering/metrologic, FSRS-lite review scheduling, gate-vs-review grading distinction, lens rendering with honest Lakotaean absence. Not yet: any unit past Unit 1; richer answer-input forms (distinguish/relate are free-text).",
       "shelf": "Study",
       "intentLog": {
         "schemaVersion": "none-v0"
