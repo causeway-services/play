@@ -35,7 +35,7 @@ test/            node --test behavioral tests
 ## Install and run
 
 ```
-npm install                 # pulls @red-cup-engineering/cartridge from Verdaccio (see .npmrc)
+npm install                 # pulls @red-cup-engineering/gaming/running from Verdaccio (see .npmrc)
 npm run serve                # http://127.0.0.1:8561/
 node serve.mjs 3000          # or pick a port positionally
 PORT=3000 node serve.mjs     # or via env
@@ -91,7 +91,7 @@ npm run check      # node --check over serve.mjs, js/*.mjs, test/*.test.mts
 ```
 
 The suite validates `catalog.json` against the real, published
-`@red-cup-engineering/cartridge`'s own `validateManifest` (strict, for any entry with
+`@red-cup-engineering/gaming/running`'s own `validateManifest` (strict, for any entry with
 `cartridgeWrapped: true`), checks `index.html`/`today.html` reference only local assets,
 and boots `serve.mjs` on an ephemeral port for real HTTP round-trips against its routes,
 a 404, and a path-traversal attempt.
@@ -140,7 +140,7 @@ On top of the spec, each entry carries a few storefront-only extensions:
 - `statusNote`: a short note when there's something worth knowing beyond the description
   (a known limitation, a design constraint) -- omitted when there's nothing to add.
 - `cartridgeWrapped` / `energyBankWrapped`: whether the game ships its own
-  `@red-cup-engineering/cartridge` manifest module / settles against
+  `@red-cup-engineering/gaming/running` manifest module / settles against
   `@red-cup-engineering/energy-bank`. A manifest claiming `cartridgeWrapped: true` is held
   to it: the generator stats `replayVerifier`'s file and import-checks its named export,
   and refuses to build if either doesn't resolve against the real tree -- it does not trust

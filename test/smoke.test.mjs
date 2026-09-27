@@ -1,7 +1,7 @@
 // Behavioral tests for play.561.group -- node --test. Verifies: catalog.json parses and every
 // entry is shaped like a CartridgeManifest plus this site's storefront-only extensions
 // (cartridgeWrapped:true entries validated against the real published
-// @red-cup-engineering/cartridge; no entry may ever explicitly null a field); index.html and
+// @red-cup-engineering/gaming/running; no entry may ever explicitly null a field); index.html and
 // today.html reference only local assets; today.mjs's strips match catalog.json's daily-utc
 // entries; serve.mjs actually serves its routes over real HTTP (ephemeral port), a 404, and
 // a path-traversal attempt.
@@ -11,7 +11,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { validateManifest } from '@red-cup-engineering/cartridge/manifest';
+import { validateGameManifest } from '@red-cup-engineering/gaming/running/manifest';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..');
@@ -85,11 +85,11 @@ test('no catalog entry ever explicitly nulls a field -- omit it instead', async 
   }
 });
 
-test('every cartridgeWrapped:true entry fully validates against the real @red-cup-engineering/cartridge validateManifest', async () => {
+test('every cartridgeWrapped:true entry fully validates against the real @red-cup-engineering/gaming/running validateGameManifest', async () => {
   const catalog = await loadCatalog();
   for (const entry of catalog.games) {
     if (entry.cartridgeWrapped !== true) continue;
-    const result = validateManifest(toManifestShape(entry));
+    const result = validateGameManifest(toManifestShape(entry));
     assert.equal(result.valid, true, `${entry.id}: ${result.errors.join('; ')}`);
   }
 });
@@ -162,7 +162,7 @@ test('every catalog entry matches the honest subset of the CartridgeManifest sha
     // genuinely has none -- the honest move is to omit the key (cartridgeWrapped:false
     // is the marker of record for "not yet wrapped"), not to fake a null value. A
     // cartridgeWrapped:true entry is held to the full spec requirement by the strict
-    // validateManifest test above, which will fail loudly if it's missing there.
+    // validateGameManifest test above, which will fail loudly if it's missing there.
     if (entry.replayVerifier !== undefined) {
       assert.ok(isNonEmptyString(entry.replayVerifier), `${label}: replayVerifier must be a non-empty string when present`);
     } else {

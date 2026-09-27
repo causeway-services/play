@@ -260,7 +260,7 @@ export async function buildCatalog({ generatedDate } = {}) {
 
   const catalog = {
     $schemaNote:
-      "One cartridge-manifest-shaped entry per game, validated against the real, published @red-cup-engineering/cartridge's validateManifest by test/smoke.test.mts (full strict validation when cartridgeWrapped is true, an honest subset check otherwise). A field this catalog can't fill in yet is omitted, never set to null. status, statusNote, repoPath, cartridgeWrapped, energyBankWrapped, and shelf are storefront-only extensions, not part of the manifest spec.",
+      "One cartridge-manifest-shaped entry per game, validated against the real, published @red-cup-engineering/gaming/running's validateGameManifest by test/smoke.test.mts (full strict validation when cartridgeWrapped is true, an honest subset check otherwise). A field this catalog can't fill in yet is omitted, never set to null. status, statusNote, repoPath, cartridgeWrapped, energyBankWrapped, and shelf are storefront-only extensions, not part of the manifest spec.",
     generated: generatedDate ?? new Date().toISOString().slice(0, 10),
     games,
   };

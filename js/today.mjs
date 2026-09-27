@@ -1,7 +1,7 @@
 // Pure daily-strip projection followed by the browser-only page bootstrap.
 
 import { esc, GLYPHS, FALLBACK_GLYPH, EXTERNAL_LINK_ICON } from './catalog.mjs';
-import { utcDateString, dailySeed } from '@red-cup-engineering/cartridge/seed';
+import { utcDateString, dailySeed } from '@red-cup-engineering/gaming/running/seed';
 import { LIVE_SUBDOMAINS } from './live-subdomains.mjs';
 
 export { esc, utcDateString };
