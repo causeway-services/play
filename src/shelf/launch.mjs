@@ -43,13 +43,20 @@ export function findMonorepoRoot(startDir) {
 
 const ROOT = findMonorepoRoot(HERE);
 
+// The Group's own directory beneath the checkout, found in this file's own path (as build-catalog does),
+// so the sibling programs below are named relative to it.
+const GROUP_MARKER = /[\\/]lib[\\/][^\\/]+[\\/]services[\\/]561-group[\\/]/u;
+const marker = GROUP_MARKER.exec(HERE);
+const GROUP_ROOT = marker === null ? ROOT : HERE.slice(0, marker.index + marker[0].length);
+
+// Paths relative to the Group's directory.
 const REPO_RELATIVE = {
-  durante: "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/durante.play.561.group/scripts/durante-terminal.mjs",
-  farstone: "lib/emsenn/services/561-group/services/public-services-section/services/public-computer-services-section/services/public-web-services-section/services/public-web-game-services-section/services/farstone-services-section/apps/terminal-client/bin/farstone.mjs",
+  durante: "services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/durante.play.561.group/scripts/durante-terminal.mjs",
+  farstone: "services/public-services-section/services/public-computer-services-section/services/public-web-services-section/services/public-web-game-services-section/services/farstone-services-section/apps/terminal-client/bin/farstone.mjs",
 };
 
-export const DURANTE_TERMINAL_BIN = path.join(ROOT, REPO_RELATIVE.durante);
-export const FARSTONE_CLIENT_BIN = path.join(ROOT, REPO_RELATIVE.farstone);
+export const DURANTE_TERMINAL_BIN = path.join(GROUP_ROOT, REPO_RELATIVE.durante);
+export const FARSTONE_CLIENT_BIN = path.join(GROUP_ROOT, REPO_RELATIVE.farstone);
 
 export function publicHostname(game) {
   return game.hostname || `${game.subdomain}.561.group`;

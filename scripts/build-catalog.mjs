@@ -32,20 +32,21 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SITE_ROOT = path.join(HERE, '..');
 
-// The monorepo root that catalog.json's historical repoPath values were
-// written relative to (e.g. "lib/emsenn/services/561-group/services/...").
-// Found by locating that marker in this file's own path rather than counting
-// ".." segments, so it survives this site itself moving to a new depth.
-const REPO_MARKER = `${path.sep}lib${path.sep}emsenn${path.sep}services${path.sep}561-group${path.sep}`;
-const markerIndex = HERE.indexOf(REPO_MARKER);
-if (markerIndex === -1) {
-  throw new Error(`could not locate "${REPO_MARKER}" in ${HERE} to determine the monorepo root`);
+// The monorepo root that the catalog's repoPath values are written relative to, and the Group's
+// own directory beneath it. Found by locating the Group's directory in this file's own path
+// rather than counting ".." segments, so it survives this site itself moving to a new depth.
+const SEP = path.sep.replace(/[\\]/gu, '\\$&');
+const GROUP_MARKER = new RegExp(`${SEP}lib${SEP}[^${SEP}]+${SEP}services${SEP}561-group${SEP}`, 'u');
+const marker = GROUP_MARKER.exec(HERE);
+if (marker === null) {
+  throw new Error(`could not locate the Group's directory under lib/ in ${HERE} to determine the monorepo root`);
 }
-const REPO_ROOT = HERE.slice(0, markerIndex);
+const REPO_ROOT = HERE.slice(0, marker.index);
+const GROUP_ROOT = HERE.slice(0, marker.index + marker[0].length);
 
 const GAME_SITE_ROOT = path.join(
-  REPO_ROOT,
-  'lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites',
+  GROUP_ROOT,
+  'services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites',
 );
 
 // Known trees where a game's service directory can live. Games move between
@@ -57,16 +58,16 @@ const GAME_SITE_ROOT = path.join(
 const SEARCH_ROOTS = [
   GAME_SITE_ROOT,
   path.join(
-    REPO_ROOT,
-    'lib/emsenn/services/561-group/services/science-services-section/services/philosophy-services-section/services/relationality-services-section/services/agency-services-section/services/being-services-section/services/doing-services-section/services/playing-services-section/services/gaming-services-section/services/board-games-services-section/services/weiqi-services-section',
+    GROUP_ROOT,
+    'services/science-services-section/services/philosophy-services-section/services/relationality-services-section/services/agency-services-section/services/being-services-section/services/doing-services-section/services/playing-services-section/services/gaming-services-section/services/board-games-services-section/services/weiqi-services-section',
   ),
   path.join(
-    REPO_ROOT,
-    'lib/emsenn/services/561-group/services/public-services-section/services/public-computer-services-section/services/public-web-services-section/services/public-web-game-services-section/services',
+    GROUP_ROOT,
+    'services/public-services-section/services/public-computer-services-section/services/public-web-services-section/services/public-web-game-services-section/services',
   ),
   path.join(
-    REPO_ROOT,
-    'lib/emsenn/services/561-group/services/public-services-section/services/public-publishing-services-section/services/public-computer-publishing-services-section/services/public-system-computer-publishing-section/services/public-web-publishing-services-section/sites',
+    GROUP_ROOT,
+    'services/public-services-section/services/public-publishing-services-section/services/public-computer-publishing-services-section/services/public-system-computer-publishing-section/services/public-web-publishing-services-section/sites',
   ),
 ];
 
