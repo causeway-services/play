@@ -131,8 +131,8 @@ Each game's `catalog-entry.json` is shaped like the spec's `CartridgeManifest`: 
 can't honestly fill in yet (a `replayVerifier` module, an `intentLog.schemaRef`) is
 omitted, never set to `null` -- `test/smoke.test.mts` enforces that as a standing rule. Do
 not include `repoPath`: the generator derives it from wherever it actually found the
-manifest, which is also why a game's directory moving can never leave a stale path behind
-the way hand-typed `repoPath` values used to.
+manifest (build-time only; the published catalog.json omits it), which is also why a game's
+directory moving can never leave a stale path behind the way hand-typed `repoPath` values used to.
 
 On top of the spec, each entry carries a few storefront-only extensions:
 

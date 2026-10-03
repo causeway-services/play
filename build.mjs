@@ -20,11 +20,11 @@ const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const FAVICON = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23a3402a'/%3E%3Ctext x='12' y='17' font-family='monospace' font-size='13' fill='%23fff8f4' text-anchor='middle'%3E561%3C/text%3E%3C/svg%3E`;
 
 // House ad server (@red-cup-engineering/advertising-services-section), v0
-// unlisted workers.dev route. The footer slot fetches its creative
+// served at ads.561.group. The footer slot fetches its creative
 // client-side, at property="play-561-group", so it self-excludes and
 // never advertises play.561.group on its own page.
 const HOUSE_AD_FOOTER = `<div id="house-ad-footer" data-slot="footer" data-property="play-561-group"></div>
-  <script>(function(){var s="footer",p="play-561-group",el=document.getElementById("house-ad-footer"),base="https://house-ads-server.morgan-sennhauser.workers.dev";fetch(base+"/ad?slot="+s+"&property="+p).then(function(r){return r.ok?r.json():null;}).then(function(d){if(!d||!d.creative||!el)return;var a=document.createElement("a");a.href=base+"/click?slot="+s+"&property="+p+"&creative="+encodeURIComponent(d.creative.id);a.rel="sponsored noopener noreferrer";a.textContent=d.creative.title+" -- "+d.creative.body;el.appendChild(a);}).catch(function(){});})();</script>`;
+  <script>(function(){var s="footer",p="play-561-group",el=document.getElementById("house-ad-footer"),base="https://ads.561.group";fetch(base+"/ad?slot="+s+"&property="+p).then(function(r){return r.ok?r.json():null;}).then(function(d){if(!d||!d.creative||!el)return;var a=document.createElement("a");a.href=base+"/click?slot="+s+"&property="+p+"&creative="+encodeURIComponent(d.creative.id);a.rel="sponsored noopener noreferrer";a.textContent=d.creative.title+" -- "+d.creative.body;el.appendChild(a);}).catch(function(){});})();</script>`;
 
 const MARK_SVG = `<svg class="mark" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <ellipse cx="24" cy="24" rx="18" ry="11"/>

@@ -15,7 +15,7 @@ const ROOT = path.join(HERE, '..');
 test('index.html carries a house ad footer slot, contextual-only, no cookies', async () => {
   const html = await readFile(path.join(ROOT, 'index.html'), 'utf8');
   assert.match(html, /<div id="house-ad-footer" data-slot="footer" data-property="play-561-group"><\/div>/);
-  assert.match(html, /base="https:\/\/house-ads-server\.morgan-sennhauser\.workers\.dev"/);
+  assert.match(html, /base="https:\/\/ads\.561\.group"/);
   assert.match(html, /fetch\(base\+"\/ad\?slot="/);
   assert.match(html, /base\+"\/click\?slot="/);
   assert.ok(!/document\.cookie/.test(html), 'ad footer slot must not set cookies');

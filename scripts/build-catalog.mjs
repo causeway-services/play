@@ -260,12 +260,15 @@ export async function buildCatalog({ generatedDate } = {}) {
 
   const catalog = {
     $schemaNote:
-      "One cartridge-manifest-shaped entry per game, validated against the real, published @red-cup-engineering/gaming/running's validateGameManifest by test/smoke.test.mts (full strict validation when cartridgeWrapped is true, an honest subset check otherwise). A field this catalog can't fill in yet is omitted, never set to null. status, statusNote, repoPath, cartridgeWrapped, energyBankWrapped, and shelf are storefront-only extensions, not part of the manifest spec.",
+      "One cartridge-manifest-shaped entry per game, validated against the real, published @red-cup-engineering/gaming/running's validateGameManifest by test/smoke.test.mts (full strict validation when cartridgeWrapped is true, an honest subset check otherwise). A field this catalog can't fill in yet is omitted, never set to null. status, statusNote, cartridgeWrapped, energyBankWrapped, and shelf are storefront-only extensions, not part of the manifest spec.",
     generated: generatedDate ?? new Date().toISOString().slice(0, 10),
     games,
   };
 
-  const json = JSON.stringify(catalog, null, 2) + '\n';
+  // repoPath is build-time provenance only (tests read it from `catalog`); the published
+  // catalog.json never carries repository-internal paths.
+  const publicCatalog = { ...catalog, games: games.map(({ repoPath: _internal, ...entry }) => entry) };
+  const json = JSON.stringify(publicCatalog, null, 2) + '\n';
   return { catalog, json };
 }
 

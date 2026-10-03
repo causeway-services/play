@@ -1,5 +1,5 @@
 {
-  "$schemaNote": "One cartridge-manifest-shaped entry per game, validated against the real, published @red-cup-engineering/gaming/running's validateManifest by test/smoke.test.mts (full strict validation when cartridgeWrapped is true, an honest subset check otherwise). A field this catalog can't fill in yet is omitted, never set to null. status, statusNote, repoPath, cartridgeWrapped, energyBankWrapped, and shelf are storefront-only extensions, not part of the manifest spec.",
+  "$schemaNote": "One cartridge-manifest-shaped entry per game, validated against the real, published @red-cup-engineering/gaming/running's validateManifest by test/smoke.test.mts (full strict validation when cartridgeWrapped is true, an honest subset check otherwise). A field this catalog can't fill in yet is omitted, never set to null. status, statusNote, cartridgeWrapped, energyBankWrapped, and shelf are storefront-only extensions, not part of the manifest spec.",
   "generated": "2026-09-14",
   "games": [
     {
@@ -123,8 +123,7 @@
       "energyBankWrapped": false,
       "shelf": "Card Table",
       "cartridgeWrapped": true,
-      "hostname": "solitaire.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/solitaire.play.561.group"
+      "hostname": "solitaire.play.561.group"
     },
     {
       "id": "gambling-trainer",
@@ -172,8 +171,7 @@
       "energyBankWrapped": false,
       "shelf": "Card Table",
       "cartridgeWrapped": true,
-      "hostname": "gambling-trainer.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/gambling-trainer.play.561.group"
+      "hostname": "gambling-trainer.play.561.group"
     },
     {
       "id": "flickering-delve",
@@ -207,8 +205,7 @@
       "cartridgeWrapped": false,
       "shelf": "Puzzle Den",
       "statusNote": "Cartridge layer (src/cartridge.mts) was removed as unconsumed; game runs on src/ledger.mts directly. Re-wrap when a real replayVerifier export exists again.",
-      "hostname": "flickering.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/flickering.play.561.group"
+      "hostname": "flickering.play.561.group"
     },
     {
       "id": "onestone",
@@ -784,8 +781,7 @@
       "energyBankWrapped": false,
       "shelf": "Puzzle Den",
       "cartridgeWrapped": true,
-      "hostname": "onestone.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/onestone.play.561.group"
+      "hostname": "onestone.play.561.group"
     },
     {
       "id": "crucible",
@@ -815,8 +811,7 @@
       "energyBankWrapped": false,
       "shelf": "Puzzle Den",
       "cartridgeWrapped": true,
-      "hostname": "crucible.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/crucible.play.561.group"
+      "hostname": "crucible.play.561.group"
     },
     {
       "id": "stoke",
@@ -845,8 +840,7 @@
       "energyBankWrapped": false,
       "shelf": "Puzzle Den",
       "cartridgeWrapped": true,
-      "hostname": "stoke.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/stoke.play.561.group"
+      "hostname": "stoke.play.561.group"
     },
     {
       "id": "weiqi",
@@ -878,8 +872,7 @@
         "sgf",
         "capture-go"
       ],
-      "shelf": "Study",
-      "repoPath": "lib/emsenn/services/561-group/services/science-services-section/services/philosophy-services-section/services/relationality-services-section/services/agency-services-section/services/being-services-section/services/doing-services-section/services/playing-services-section/services/gaming-services-section/services/board-games-services-section/services/weiqi-services-section"
+      "shelf": "Study"
     },
     {
       "id": "ruinfold",
@@ -907,8 +900,7 @@
         "leaderboard"
       ],
       "shelf": "Deep",
-      "hostname": "ruinfold.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/ruinfold.play.561.group"
+      "hostname": "ruinfold.play.561.group"
     },
     {
       "id": "durante",
@@ -946,8 +938,7 @@
       "energyBankWrapped": false,
       "shelf": "unshelved",
       "cartridgeWrapped": true,
-      "hostname": "durante.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/durante.play.561.group"
+      "hostname": "durante.play.561.group"
     },
     {
       "id": "farstone",
@@ -980,8 +971,7 @@
         "rest-api",
         "headless"
       ],
-      "shelf": "Deep",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/farstone.561.group"
+      "shelf": "Deep"
     },
     {
       "id": "aletheon",
@@ -1011,8 +1001,7 @@
         "illocution",
         "real-time"
       ],
-      "shelf": "unshelved",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/aletheon.561.group"
+      "shelf": "unshelved"
     },
     {
       "id": "be-not-so-fearful",
@@ -1052,8 +1041,7 @@
       "energyBankWrapped": false,
       "shelf": "Puzzle Den",
       "cartridgeWrapped": true,
-      "hostname": "fearful.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/fearful.play.561.group"
+      "hostname": "fearful.play.561.group"
     },
     {
       "id": "blackjack",
@@ -1106,8 +1094,7 @@
       "energyBankWrapped": true,
       "shelf": "Card Table",
       "cartridgeWrapped": true,
-      "hostname": "casino.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/casino.play.561.group/src/games/blackjack"
+      "hostname": "casino.play.561.group"
     },
     {
       "id": "chutes",
@@ -1168,8 +1155,7 @@
       "energyBankWrapped": false,
       "shelf": "Card Table",
       "cartridgeWrapped": true,
-      "hostname": "parlor.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/parlor.play.561.group/src/games/chutes"
+      "hostname": "parlor.play.561.group"
     },
     {
       "id": "equivo",
@@ -1197,8 +1183,7 @@
         "equivalence",
         "bilattice"
       ],
-      "hostname": "equivo.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/equivo.play.561.group"
+      "hostname": "equivo.play.561.group"
     },
     {
       "id": "farkle",
@@ -1229,8 +1214,7 @@
       "energyBankWrapped": false,
       "shelf": "Card Table",
       "cartridgeWrapped": true,
-      "hostname": "parlor.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/parlor.play.561.group/src/games/farkle"
+      "hostname": "parlor.play.561.group"
     },
     {
       "id": "pig",
@@ -1261,8 +1245,7 @@
       "energyBankWrapped": false,
       "shelf": "Card Table",
       "cartridgeWrapped": true,
-      "hostname": "parlor.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/parlor.play.561.group/src/games/pig"
+      "hostname": "parlor.play.561.group"
     },
     {
       "id": "reels",
@@ -1304,8 +1287,7 @@
       "energyBankWrapped": false,
       "shelf": "Card Table",
       "cartridgeWrapped": true,
-      "hostname": "parlor.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/parlor.play.561.group/src/games/reels"
+      "hostname": "parlor.play.561.group"
     },
     {
       "id": "slots",
@@ -1356,8 +1338,7 @@
       "energyBankWrapped": true,
       "shelf": "Card Table",
       "cartridgeWrapped": true,
-      "hostname": "casino.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/casino.play.561.group/src/games/slots"
+      "hostname": "casino.play.561.group"
     },
     {
       "id": "yacht",
@@ -1388,8 +1369,7 @@
       "energyBankWrapped": false,
       "shelf": "Card Table",
       "cartridgeWrapped": true,
-      "hostname": "parlor.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/parlor.play.561.group/src/games/yacht"
+      "hostname": "parlor.play.561.group"
     },
     {
       "id": "you-are-conscious",
@@ -1419,8 +1399,7 @@
       "energyBankWrapped": false,
       "shelf": "Puzzle Den",
       "cartridgeWrapped": true,
-      "hostname": "you-are-conscious.play.561.group",
-      "repoPath": "lib/emsenn/services/561-group/services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/you-are-conscious.play.561.group"
+      "hostname": "you-are-conscious.play.561.group"
     }
   ]
 }
