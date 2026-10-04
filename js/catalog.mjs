@@ -214,6 +214,9 @@ export async function initCatalogPage() {
     restoreControlsFromUrl();
     applyFilters();
   });
+  SEARCH.disabled = false;
+  SHELF.disabled = false;
+  STATUS_BUTTONS.forEach((button) => { button.disabled = false; });
 }
 
 if (typeof document !== 'undefined' && document.getElementById('catalog-grid')) {

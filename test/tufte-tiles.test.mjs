@@ -112,7 +112,7 @@ test('built index.html exposes one accessible shelf option for every catalog she
     readPublication('index.html'),
   ]);
   assert.match(html, /<label for="shelf-filter">Shelf<\/label>/);
-  assert.match(html, /<select id="shelf-filter" name="shelf">/);
+  assert.match(html, /<select id="shelf-filter" name="shelf" disabled>/);
   assert.match(html, /<option value="all">All shelves<\/option>/);
   for (const shelf of shelfValues(entries)) {
     assert.ok(html.includes(`<option value="${shelf}">${shelf}</option>`), `missing ${shelf} shelf option`);

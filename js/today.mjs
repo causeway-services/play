@@ -169,7 +169,10 @@ export async function initTodayPage() {
   }
   const update = () => refresh().catch(() => { dateLabel.textContent += ' — update unavailable'; });
   await update();
-  if (button) button.addEventListener('click', update);
+  if (button) {
+    button.addEventListener('click', update);
+    button.disabled = false;
+  }
 }
 
 if (typeof document !== 'undefined' && document.getElementById('today-list')) {

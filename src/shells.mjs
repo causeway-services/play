@@ -60,14 +60,14 @@ export function indexHtml(gridFragment, entries = []) {
   <main>
     <div class="controls">
       <label class="visually-hidden" for="search">Search games</label>
-      <input type="search" id="search" placeholder="Search by name or keyword&hellip;" autocomplete="off" />
+      <input type="search" id="search" disabled placeholder="Search by name or keyword&hellip;" autocomplete="off" />
       <div class="status-filter" role="group" aria-label="Filter by status">
-        <button type="button" data-status="all" aria-pressed="true">All</button>
-        <button type="button" data-status="playable" aria-pressed="false">Reported playable</button>
-        <button type="button" data-status="in-development" aria-pressed="false">In development</button>
+        <button type="button" disabled data-status="all" aria-pressed="true">All</button>
+        <button type="button" disabled data-status="playable" aria-pressed="false">Reported playable</button>
+        <button type="button" disabled data-status="in-development" aria-pressed="false">In development</button>
       </div>
       <div class="shelf-filter-label"><label for="shelf-filter">Shelf</label>
-        <select id="shelf-filter" name="shelf">
+        <select id="shelf-filter" name="shelf" disabled>
           <option value="all">All shelves</option>
           ${shelfOptions}
         </select>
@@ -129,7 +129,7 @@ export function todayHtml(gridFragment, date) {
   <main>
     <div class="today-toolbar">
       <p class="result-count" id="today-date" aria-live="polite">${escHtml(date)} UTC</p>
-      <button type="button" id="today-refresh">Refresh UTC date</button>
+      <button type="button" id="today-refresh" disabled>Refresh UTC date</button>
     </div>
 
     <div class="today-list-wrap" id="today-list" role="region" aria-label="Today's daily seeds">${gridFragment}</div>
