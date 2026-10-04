@@ -237,3 +237,30 @@ test("js/today.mjs's strips match exactly catalog.json's daily-utc entries", asy
   const ids = (await computeTodayStrips(new Date(), catalog.games)).map((strip) => strip.id);
   assert.deepEqual(new Set(ids), new Set(dailyIds));
 });
+
+test('daily Solitaire follows its authored table and variant, with the same seed as the game', async () => {
+  const { dailySeed } = await import('../../solitaire.play.561.group/src/daily.mjs');
+  const { computeTodayStrips } = await import('../js/today.mjs');
+  const game = (await loadCatalog()).games.find((entry) => entry.id === 'solitaire');
+  const date = new Date('2026-10-03T23:59:59Z');
+  const [current] = await computeTodayStrips(date, [game]);
+  assert.equal(new URL(current.url).pathname, '/web/table.html');
+  assert.equal(current.seedValue, dailySeed(date, 'klondike-draw1'));
+  const relocated = { ...game, hostname: 'authored-host.561.group', entryPoints: { ...game.entryPoints, daily: '/new-table/?variant=freecell&daily=1' } };
+  const [changed] = await computeTodayStrips(date, [relocated]);
+  assert.equal(new URL(changed.url).hostname, 'authored-host.561.group');
+  assert.equal(new URL(changed.url).pathname, '/new-table/');
+  assert.equal(new URL(changed.url).searchParams.get('date'), '2026-10-03');
+  assert.equal(changed.seedValue, dailySeed(date, 'freecell'));
+  assert.ok(changed.seedLabel.includes(game.configs.find((config) => config.id === 'freecell').displayName));
+});
+
+
+test('daily reel seed agrees with the game bootstrap without an invented config argument', async () => {
+  const { dailySeed } = await import('../../parlor.play.561.group/src/games/reels/daily.mjs');
+  const { computeTodayStrips } = await import('../js/today.mjs');
+  const game = (await loadCatalog()).games.find(entry => entry.id === 'reels');
+  const date = new Date('2026-10-04T12:00:00Z');
+  const [strip] = await computeTodayStrips(date, [game]);
+  assert.equal(strip.seedValue, dailySeed(date));
+});

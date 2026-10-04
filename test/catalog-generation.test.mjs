@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { discoverCatalog } from '../src/discover-catalog.mjs';
@@ -19,18 +19,6 @@ test('every game with a catalog-entry.json is represented in catalog.json exactl
   const ids = catalog.games.map((g) => g.id);
   assert.equal(new Set(ids).size, ids.length, 'duplicate game id in generated catalog');
   assert.ok(ids.length > 0, 'expected at least one game');
-});
-
-test('every catalog game carried by a public game site derives its hostname from that site', async () => {
-  const { catalog } = await discoverCatalog();
-  const marker = '/public-web-games-services-section/sites/';
-  const siteGames = catalog.games.filter((game) => game.repoPath.includes(marker));
-  assert.ok(siteGames.length > 0, 'expected at least one game in the public web-games site carrier');
-  for (const game of siteGames) {
-    const site = game.repoPath.slice(game.repoPath.indexOf(marker) + marker.length).split('/')[0];
-    assert.equal(game.hostname, site, `${game.id} must use its containing site directory as hostname`);
-    assert.match(site, /^[a-z0-9-]+(?:\.play)?\.561\.group$/, `${game.id} site must be a public *.561.group hostname`);
-  }
 });
 
 test('catalog sidecars expose every independently replayable casino and parlor game, never their non-game service lobbies', async () => {
@@ -103,21 +91,33 @@ test('discoverCatalog() refuses to build when a cartridgeWrapped:true manifest c
 test('authored additions and edits reach publication directly', async () => {
   const { publishShelf } = await import('../src/publication.mjs');
   const home = path.join(GAMES_ROOT, '__source-change-fixture');
+  const moved = path.join(GAMES_ROOT, '__relocated-source-fixture.play.561.group');
   await mkdir(home, { recursive: true });
-  const record = { id: '__source-change-fixture', displayName: 'Unlisted source', description: 'First description', subdomain: 'source-change-fixture', entryPoints: { browser: '/' }, status: 'in-development', seedPolicy: { kind: 'on-demand' }, cartridgeWrapped: false, keywords: ['fixture'], shelf: 'Study' };
+  const record = { id: '__source-change-fixture', displayName: 'Unlisted source', description: 'First description', subdomain: 'source-change-fixture', hostname: 'authored-address.561.group', entryPoints: { browser: '/lesson/' }, status: 'in-development', seedPolicy: { kind: 'on-demand' }, cartridgeWrapped: false, keywords: ['fixture'], shelf: 'Study' };
   try {
     await writeFile(path.join(home, 'catalog-entry.json'), JSON.stringify(record));
     const first = await publishShelf({ observePages: false });
     assert.ok(first.artifacts.find((asset) => asset.path === 'index.html').body.includes('First description'));
+    assert.ok(first.artifacts.find((asset) => asset.path === 'index.html').body.includes('href="https://authored-address.561.group/lesson/"'));
     record.description = 'Edited at the source';
+    delete record.hostname;
     await writeFile(path.join(home, 'catalog-entry.json'), JSON.stringify(record));
     const second = await publishShelf({ observePages: false });
     const html = second.artifacts.find((asset) => asset.path === 'index.html').body;
     assert.ok(html.includes('Edited at the source'));
     assert.ok(!html.includes('First description'));
+    assert.ok(html.includes('href="https://source-change-fixture.561.group/lesson/"'));
     assert.equal(JSON.parse(second.artifacts.find((asset) => asset.path === 'catalog.json').body).games.filter((game) => game.id === record.id).length, 1);
     await assert.rejects(() => readFile(path.join(ROOT, 'catalog.json')), { code: 'ENOENT' });
-  } finally { await rm(home, { recursive: true, force: true }); }
+    await rename(home, moved);
+    const relocated = await publishShelf({ observePages: false });
+    const relocatedHtml = relocated.artifacts.find((asset) => asset.path === 'index.html').body;
+    assert.ok(relocatedHtml.includes('href="https://source-change-fixture.561.group/lesson/"'));
+    assert.ok(!relocatedHtml.includes('https://__relocated-source-fixture.play.561.group/'));
+  } finally {
+    await rm(home, { recursive: true, force: true });
+    await rm(moved, { recursive: true, force: true });
+  }
 });
 
 // HTTP observations cannot promote authored or broken games into tested play.

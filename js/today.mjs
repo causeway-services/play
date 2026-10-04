@@ -45,14 +45,14 @@ export const gamblingTrainerDailySeed = (dateStr, configId) => dailySeed('gambli
 // Hostnames and browser entries always come from its authored record.
 const DAILY_IDS = ['ruinfold', 'crucible', 'solitaire', 'gambling-trainer', 'durante', 'pig', 'farkle', 'yacht', 'chutes', 'reels'];
 
-function askFor(id, { floors }) {
+function askFor(id, { floors, variantName }) {
   switch (id) {
     case 'ruinfold':
       return `Descend today's ${floors}-floor keep.`;
     case 'crucible':
       return "Merge, split, rebond, and catalyze today's tangle before the furnace energy runs out.";
     case 'solitaire':
-      return "Today's Klondike Draw-1 deal: everyone gets the same shuffle.";
+      return `Today's ${variantName} deal: everyone gets the same shuffle.`;
     case 'gambling-trainer':
       return "Today's practice bankroll run -- grade every stake against the real Kelly optimum, novice track.";
     case 'durante':
@@ -82,27 +82,30 @@ export async function computeTodayStrips(date, entries = []) {
   return DAILY_IDS.filter((id) => byId.has(id)).map((id) => {
     const game = byId.get(id);
     const def = { id, name: game.displayName };
-    const url = new URL(playUrl(game));
+    const url = new URL(game.entryPoints?.daily ?? playUrl(game), playUrl(game));
+    const variantId = url.searchParams.get('variant');
+    const variantName = game.configs?.find((config) => config.id === variantId)?.displayName ?? variantId;
     if (id === 'solitaire') {
-      // The table bootstrap reads these actual URL parameters. The publisher
-      // exposes web/table.html at /table.html; this is the chosen daily variant.
-      url.pathname = '/table.html';
-      url.search = new URLSearchParams({ variant: 'klondike-draw1', daily: '1', date: dateStr }).toString();
+      // The game owns its table path and variant. Its bootstrap accepts the
+      // labelled UTC date, so following this link reproduces the printed seed.
+      url.searchParams.set('date', dateStr);
+    } else if (id === 'crucible') {
+      url.searchParams.set('date', dateStr);
     }
     const seedValue = {
       ruinfold: ruinfoldSeed,
       crucible: crucibleDailySeed(dateStr),
-      solitaire: solitaireDailySeed(dateStr, 'klondike-draw1'),
+      solitaire: id === 'solitaire' ? solitaireDailySeed(dateStr, variantId) : undefined,
       'gambling-trainer': gamblingTrainerDailySeed(dateStr, 'novice'),
       durante: duranteSeed,
       pig: dailySeed('parlor:pig', dateStr),
       farkle: dailySeed('parlor:farkle', dateStr),
       yacht: dailySeed('parlor:yacht', dateStr),
       chutes: dailySeed('parlor:chutes', dateStr, 'human,bot'),
-      reels: dailySeed('parlor:reels', dateStr, 'default'),
+      reels: dailySeed('parlor:reels', dateStr),
     }[def.id];
-    const seedLabel = def.id === 'solitaire' ? "Today's seed (Klondike Draw-1)" : "Today's seed";
-    return { ...def, game, url: url.href, ask: askFor(def.id, { floors }), seedLabel, seedValue };
+    const seedLabel = def.id === 'solitaire' ? `Today's seed (${variantName})` : "Today's seed";
+    return { ...def, game, url: url.href, ask: askFor(def.id, { floors, variantName }), seedLabel, seedValue };
   });
 }
 

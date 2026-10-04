@@ -255,15 +255,9 @@ export async function discoverCatalog({ generatedDate, observePages = false, fet
     await verifyEntry(manifest, materialized.verificationHomeDir);
 
     const repoPath = path.relative(REPO_ROOT, homeDir).split(path.sep).join('/');
-    // A manifest below the public game-sites carrier is a deployable site. Its
-    // directory name is its stable public hostname, rather than a second field
-    // each game author must keep synchronized by hand.
-    const siteRelative = path.relative(GAME_SITE_ROOT, homeDir);
-    const siteName = !siteRelative.startsWith('..') && !path.isAbsolute(siteRelative)
-      ? siteRelative.split(path.sep)[0]
-      : undefined;
-    const hostname = siteName?.endsWith('.561.group') ? siteName : undefined;
-    games.push({ ...manifest, ...(hostname ? { hostname } : {}), repoPath });
+    // The authored hostname (or subdomain's established *.561.group address)
+    // owns public identity. Repository paths are provenance, never a route.
+    games.push({ ...manifest, repoPath });
   }
 
   games.sort((a, b) => {
