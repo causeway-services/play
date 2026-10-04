@@ -1,5 +1,5 @@
-// play.561.group's one catalog projection: manifest entry -> TUFTE tile -> browser controls.
-// It has one consumer, so it stays here rather than carrying a package boundary of its own.
+// Authored game record -> card and TUFTE tile. Cowrie Games and its world
+// directory share the same entry links and dated observation wording.
 import { GLYPHS, FALLBACK_GLYPH, EXTERNAL_LINK_ICON, TERMINAL_ICON } from './glyphs.mjs';
 
 export { GLYPHS, FALLBACK_GLYPH, EXTERNAL_LINK_ICON, TERMINAL_ICON };
