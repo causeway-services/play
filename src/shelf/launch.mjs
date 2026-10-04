@@ -7,8 +7,6 @@
 // Three honest cases, matched by id/entryPoints, never guessed:
 //   - durante: a real child process, durante-terminal.mjs --daily — the terminal peer of the
 //     browser face, submitting through the same public POST /runs route.
-//   - farstone: a real child process, Farstone's own terminal client. That app owns its REST/JSON
-//     adapter and composes the generic Wheatstone UI as a dependency.
 //   - anything else with a browser entry point: print its URL and return to the shelf — no
 //     takeover, because there is no terminal client for it.
 //   - no launchable entry point at all: say so, plainly, rather than pretending.
@@ -43,7 +41,7 @@ export function findMonorepoRoot(startDir) {
 
 const ROOT = findMonorepoRoot(HERE);
 
-// The Group's own directory beneath the checkout, found in this file's own path (as build-catalog does),
+// The Group's own directory beneath the checkout, found in this file's own path (as discovery does),
 // so the sibling programs below are named relative to it.
 const GROUP_MARKER = /[\\/]lib[\\/][^\\/]+[\\/]services[\\/]561-group[\\/]/u;
 const marker = GROUP_MARKER.exec(HERE);
@@ -52,11 +50,9 @@ const GROUP_ROOT = marker === null ? ROOT : HERE.slice(0, marker.index + marker[
 // Paths relative to the Group's directory.
 const REPO_RELATIVE = {
   durante: "services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/durante.play.561.group/scripts/durante-terminal.mjs",
-  farstone: "services/public-services-section/services/public-computer-services-section/services/public-web-services-section/services/public-web-game-services-section/services/farstone-services-section/apps/terminal-client/bin/farstone.mjs",
 };
 
 export const DURANTE_TERMINAL_BIN = path.join(GROUP_ROOT, REPO_RELATIVE.durante);
-export const FARSTONE_CLIENT_BIN = path.join(GROUP_ROOT, REPO_RELATIVE.farstone);
 
 export function publicHostname(game) {
   return game.hostname || `${game.subdomain}.561.group`;
@@ -64,11 +60,8 @@ export function publicHostname(game) {
 
 // planLaunch(game) -> LaunchPlan
 export function planLaunch(game) {
-  if (game.id === "durante") {
+  if (game.id === "durante" && fs.existsSync(DURANTE_TERMINAL_BIN)) {
     return { kind: "spawn", cmd: "node", args: [DURANTE_TERMINAL_BIN, "--daily", "--base", `https://${publicHostname(game)}`] };
-  }
-  if (game.id === "farstone") {
-    return { kind: "spawn", cmd: "node", args: [FARSTONE_CLIENT_BIN, "--base", `https://${publicHostname(game)}`] };
   }
   if (game.entryPoints?.browser) {
     return { kind: "print", text: `https://${publicHostname(game)}${game.entryPoints.browser}` };

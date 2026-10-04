@@ -1,3 +1,6 @@
+import { readPublication } from './publication.mjs';
+import { discoverCatalog } from '../src/discover-catalog.mjs';
+const discovered = discoverCatalog();
 // Behavioral tests for the storefront's own TUFTE tile shaping -- the pure
 // catalog.json/daily-strip -> TUFTE tile functions in js/catalog.mjs and js/today.mjs.
 // TUFTE itself (@red-cup-engineering/web-page-tiling-engine) is tested by its own
@@ -7,7 +10,7 @@
 // Verifies:
 //   1. catalogEntryToTile/catalogModel are pure functions of catalog.json's real data.
 //   2. The tile projection round-trips through normalizeTufteModel without losing the
-//      lifecycle/confidence business rules canPlayLive()/status compute.
+//      lifecycle/confidence business rules browserAvailable()/status compute.
 //   3. The patch path: mutating one entry in a catalog.json-shaped games array produces a
 //      diffTufteProjection patch touching ONLY that entry's tile -- every other tile is
 //      untouched, proven by diffing real (not synthetic) catalog data.
@@ -33,8 +36,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..');
 
 async function loadCatalogEntries() {
-  const raw = await readFile(path.join(ROOT, 'catalog.json'), 'utf8');
-  return JSON.parse(raw).games;
+  return (await discovered).catalog.games;
 }
 
 test('catalogEntryToTile is a pure function: same entry in, structurally identical tile out, entry left untouched', async () => {
@@ -107,9 +109,9 @@ test('catalog filter query state is shareable, normalized against real shelves, 
 test('built index.html exposes one accessible shelf option for every catalog shelf', async () => {
   const [entries, html] = await Promise.all([
     loadCatalogEntries(),
-    readFile(path.join(ROOT, 'index.html'), 'utf8'),
+    readPublication('index.html'),
   ]);
-  assert.match(html, /<label class="shelf-filter-label" for="shelf-filter">Shelf/);
+  assert.match(html, /<label for="shelf-filter">Shelf<\/label>/);
   assert.match(html, /<select id="shelf-filter" name="shelf">/);
   assert.match(html, /<option value="all">All shelves<\/option>/);
   for (const shelf of shelfValues(entries)) {
@@ -142,7 +144,7 @@ test('patch path: mutating one catalog entry changes only that entry\'s tile in 
 });
 
 test('patch path: an entry\'s status flip from playable to in-development changes lifecycle AND confidence on exactly that tile', async () => {
-  const entries = await loadCatalogEntries();
+  const entries = (await loadCatalogEntries()).map((entry) => ({ ...entry, availability: { state: 'reachable' } }));
   const targetIndex = entries.findIndex((entry) => entry.status === 'playable');
   assert.ok(targetIndex !== -1);
 
@@ -156,7 +158,7 @@ test('patch path: an entry\'s status flip from playable to in-development change
   assert.equal(patches.length, 1);
   assert.equal(patches[0].id, entries[targetIndex].id);
   assert.equal(patches[0].changed.lifecycle, 'imminent');
-  // status also gates confidence via canPlayLive() (status === 'playable' is one of its
+  // status also gates confidence via browserAvailable() (status === 'playable' is one of its
   // three ANDed conditions), so flipping status away from playable must also drop
   // confidence to "low" in the same single patch, on the same single tile.
   assert.equal(patches[0].changed.confidence, 'low');
@@ -171,14 +173,14 @@ test('an untouched catalog produces an empty patch (no phantom diffs from re-der
 
 test('computeTodayModel is a pure, deterministic function of the date: same UTC day in, byte-identical model out', async () => {
   const date = new Date('2026-08-20T09:00:00Z');
-  const first = await computeTodayModel(date);
-  const second = await computeTodayModel(new Date('2026-08-20T23:59:59Z')); // same UTC calendar day
+  const first = await computeTodayModel(date, (await discovered).catalog.games);
+  const second = await computeTodayModel(new Date('2026-08-20T23:59:59Z'), (await discovered).catalog.games); // same UTC calendar day
   assert.deepEqual(first, second);
 });
 
 test('computeTodayModel: a different UTC day changes every seed-bearing tile, proven via a real diff, not a snapshot', async () => {
-  const day1 = await computeTodayModel(new Date('2026-08-20T00:00:00Z'));
-  const day2 = await computeTodayModel(new Date('2026-08-21T00:00:00Z'));
+  const day1 = await computeTodayModel(new Date('2026-08-20T00:00:00Z'), (await discovered).catalog.games);
+  const day2 = await computeTodayModel(new Date('2026-08-21T00:00:00Z'), (await discovered).catalog.games);
   const patches = diffTufteProjection(normalizeTufteModel(day1), normalizeTufteModel(day2));
   const dailyTileCount = day1.tiles.length;
   assert.equal(patches.length, dailyTileCount, 'every daily strip carries a date-derived seed, so every tile must show up in the diff across a real day change');
@@ -188,7 +190,7 @@ test('computeTodayModel: a different UTC day changes every seed-bearing tile, pr
 test('today patch path: today.html always renders exactly the catalog\'s own daily-utc entries, gated the same way catalog.mjs gates confidence', async () => {
   const entries = await loadCatalogEntries();
   const dailyIds = new Set(entries.filter((entry) => entry.seedPolicy && entry.seedPolicy.kind === 'daily-utc').map((entry) => entry.id));
-  const model = await computeTodayModel(new Date());
+  const model = await computeTodayModel(new Date(), (await discovered).catalog.games);
   assert.deepEqual(new Set(model.tiles.map((tile) => tile.id)), dailyIds);
   for (const tile of model.tiles) {
     assert.equal(tile.role, 'rail');

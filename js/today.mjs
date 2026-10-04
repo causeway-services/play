@@ -1,8 +1,7 @@
 // Pure daily-strip projection followed by the browser-only page bootstrap.
 
-import { esc, GLYPHS, FALLBACK_GLYPH, EXTERNAL_LINK_ICON } from './catalog.mjs';
+import { esc, GLYPHS, FALLBACK_GLYPH, EXTERNAL_LINK_ICON, playUrl, browserAvailable } from './catalog.mjs';
 import { utcDateString, dailySeed } from '@red-cup-engineering/gaming/running/seed';
-import { LIVE_SUBDOMAINS } from './live-subdomains.mjs';
 
 export { esc, utcDateString };
 
@@ -42,29 +41,18 @@ export const crucibleDailySeed = (dateStr) => dailySeed('crucible', dateStr);
 export const solitaireDailySeed = (dateStr, variantId) => dailySeed('solitaire', dateStr, variantId);
 export const gamblingTrainerDailySeed = (dateStr, configId) => dailySeed('gambling-trainer', dateStr, configId);
 
-const DEV_HOST = 'http://localhost:8787';
-
-const STRIP_DEFS = [
-  { id: 'ruinfold', name: 'Ruinfold', subdomain: 'ruinfold', subdomainPath: '/play', devPath: '/play' },
-  { id: 'crucible', name: 'Crucible', subdomain: 'crucible', subdomainPath: '/web/index.html', devPath: '/web/index.html' },
-  { id: 'solitaire', name: 'Solitaire', subdomain: 'solitaire', subdomainPath: '/web/table.html?variant=klondike-draw1&daily=1', devPath: '/web/table.html?variant=klondike-draw1&daily=1' },
-  { id: 'gambling-trainer', name: "Kelly's Wager", subdomain: 'gambling-trainer', subdomainPath: '/', devPath: '/web/index.html' },
-  { id: 'durante', name: 'Durante', subdomain: 'durante', subdomainPath: '/', devPath: '/' },
-  { id: 'pig', name: 'Pig', subdomain: 'parlor', subdomainPath: '/pig/', devPath: '/web/pig/' },
-  { id: 'farkle', name: 'Farkle', subdomain: 'parlor', subdomainPath: '/farkle/', devPath: '/web/farkle/' },
-  { id: 'yacht', name: 'Yacht', subdomain: 'parlor', subdomainPath: '/yacht/', devPath: '/web/yacht/' },
-  { id: 'chutes', name: 'Chutes & Ladders', subdomain: 'parlor', subdomainPath: '/chutes/', devPath: '/web/chutes/' },
-  { id: 'reels', name: 'Fair Spin', subdomain: 'parlor', subdomainPath: '/reels/', devPath: '/web/reels/' },
-];
+// Only these seed formulas have been recovered from the game's own implementation.
+// Hostnames and browser entries always come from its authored record.
+const DAILY_IDS = ['ruinfold', 'crucible', 'solitaire', 'gambling-trainer', 'durante', 'pig', 'farkle', 'yacht', 'chutes', 'reels'];
 
 function askFor(id, { floors }) {
   switch (id) {
     case 'ruinfold':
-      return `Descend today's ${floors}-floor keep and risk the five-way bilattice death, for a place on today's leaderboard.`;
+      return `Descend today's ${floors}-floor keep.`;
     case 'crucible':
-      return "Settle today's tangle to zero-H¹ -- merge, split, rebond, catalyze -- before the furnace energy runs out.";
+      return "Merge, split, rebond, and catalyze today's tangle before the furnace energy runs out.";
     case 'solitaire':
-      return "Today's solver-certified deal -- pick Klondike, FreeCell, or Spider, everyone gets the same shuffle.";
+      return "Today's Klondike Draw-1 deal: everyone gets the same shuffle.";
     case 'gambling-trainer':
       return "Today's practice bankroll run -- grade every stake against the real Kelly optimum, novice track.";
     case 'durante':
@@ -84,13 +72,23 @@ function askFor(id, { floors }) {
   }
 }
 
-export async function computeTodayStrips(date) {
+export async function computeTodayStrips(date, entries = []) {
   const dateStr = utcDateString(date);
   const { hex: ruinfoldSeed, seedInt } = await ruinfoldDailySeedHex(dateStr);
   const floors = ruinfoldFloorCount(seedInt);
   const duranteSeed = await duranteDailySeedHex(dateStr);
 
-  return STRIP_DEFS.map((def) => {
+  const byId = new Map(entries.filter((entry) => entry.seedPolicy?.kind === 'daily-utc').map((entry) => [entry.id, entry]));
+  return DAILY_IDS.filter((id) => byId.has(id)).map((id) => {
+    const game = byId.get(id);
+    const def = { id, name: game.displayName };
+    const url = new URL(playUrl(game));
+    if (id === 'solitaire') {
+      // The table bootstrap reads these actual URL parameters. The publisher
+      // exposes web/table.html at /table.html; this is the chosen daily variant.
+      url.pathname = '/table.html';
+      url.search = new URLSearchParams({ variant: 'klondike-draw1', daily: '1', date: dateStr }).toString();
+    }
     const seedValue = {
       ruinfold: ruinfoldSeed,
       crucible: crucibleDailySeed(dateStr),
@@ -104,26 +102,25 @@ export async function computeTodayStrips(date) {
       reels: dailySeed('parlor:reels', dateStr, 'default'),
     }[def.id];
     const seedLabel = def.id === 'solitaire' ? "Today's seed (Klondike Draw-1)" : "Today's seed";
-    return { ...def, ask: askFor(def.id, { floors }), seedLabel, seedValue };
+    return { ...def, game, url: url.href, ask: askFor(def.id, { floors }), seedLabel, seedValue };
   });
 }
 
 function todayStripBodyHtml(strip) {
   const glyph = GLYPHS[strip.id] || FALLBACK_GLYPH;
-  const isLive = LIVE_SUBDOMAINS.has(strip.subdomain);
-  const playLink = isLive
-    ? `<a class="play-link" href="https://${esc(strip.subdomain)}.561.group${esc(strip.subdomainPath)}">${EXTERNAL_LINK_ICON} Play at ${esc(strip.subdomain)}.561.group</a>`
-    : `<span class="play-link" aria-disabled="true">Not yet deployed -- run it locally</span>`;
+  const reached = browserAvailable(strip.game);
+  const playLink = `<a class="play-link" href="${esc(strip.url)}">${EXTERNAL_LINK_ICON} Open ${esc(strip.name)}</a>`;
+  const pageStatus = reached ? 'Entry page reached at publication.' : 'Entry page unavailable at publication; you can still try its address.';
   return `
     <div class="strip-head">
       <span class="card-glyph">${glyph}</span>
-      <span class="badge playable">Live daily</span>
+      <span class="badge playable">UTC daily seed</span>
     </div>
     <p class="strip-ask">${esc(strip.ask)}</p>
     <p class="strip-seed"><span class="seed-label">${esc(strip.seedLabel)}</span> <code>${esc(strip.seedValue)}</code></p>
     <div class="strip-links">
       ${playLink}
-      <a class="dev-link" href="${esc(DEV_HOST + strip.devPath)}">${esc(DEV_HOST + strip.devPath)} <span class="dev-hint">(local dev)</span></a>
+      <span class="availability-note">${pageStatus}</span>
     </div>
   `;
 }
@@ -134,67 +131,45 @@ function todayEntryToTile(strip) {
     title: strip.name,
     role: 'rail',
     lifecycle: 'present',
-    confidence: LIVE_SUBDOMAINS.has(strip.subdomain) ? 'high' : 'low',
+    confidence: browserAvailable(strip.game) ? 'high' : 'low',
     html: todayStripBodyHtml(strip),
   };
 }
 
-export async function computeTodayModel(date) {
-  const strips = await computeTodayStrips(date);
+export async function computeTodayModel(date, entries = []) {
+  const strips = await computeTodayStrips(date, entries);
   return { tiles: strips.map(todayEntryToTile) };
 }
 
 export async function initTodayPage() {
-  const gridWrapper = document.getElementById('today-list');
-  if (!gridWrapper) return; // not on today.html -- safe no-op import elsewhere
-
-  const { renderTufteFragment, normalizeTufteModel, diffTufteProjection } = await import('@red-cup-engineering/web-page-tiling-engine');
-  const { applyTufteProjectionPatch } = await import('@red-cup-engineering/web-page-tiling-engine/browser');
-
-  const DATE_LABEL = document.getElementById('today-date');
-  const REFRESH_BUTTON = document.getElementById('today-refresh');
-
-  let lastProjection = null;
-
-  async function renderFresh(date) {
-    const model = await computeTodayModel(date);
-    const projection = normalizeTufteModel(model);
-    gridWrapper.innerHTML = renderTufteFragment(model);
-    lastProjection = projection;
-    DATE_LABEL.textContent = `${utcDateString(date)} UTC`;
-  }
-
-  async function refresh() {
-    if (!lastProjection) return renderFresh(new Date());
-    let entries;
-    try {
-      const res = await fetch('catalog.json', { headers: { accept: 'application/json' } });
-      if (!res.ok) throw new Error(`catalog.json responded ${res.status}`);
-      const catalog = await res.json();
-      entries = Array.isArray(catalog.games) ? catalog.games : [];
-    } catch {
-      // catalog.json is unreachable -- leave the last-known-good grid on screen rather
-      // than blanking it; the button simply has nothing new to show this click.
-      return;
-    }
-    const dailyIds = new Set(entries.filter((g) => g.seedPolicy && g.seedPolicy.kind === 'daily-utc').map((g) => g.id));
-    const strips = await computeTodayStrips(new Date());
-    const model = { tiles: strips.filter((s) => dailyIds.has(s.id)).map(todayEntryToTile) };
-    const nextProjection = normalizeTufteModel(model);
-    applyTufteProjectionPatch(gridWrapper, diffTufteProjection(lastProjection, nextProjection));
-    lastProjection = nextProjection;
-    DATE_LABEL.textContent = `${utcDateString(new Date())} UTC`;
-  }
-
-  DATE_LABEL.textContent = "Computing today's UTC date…";
+  const grid = document.getElementById('today-list');
+  if (!grid) return;
+  const dateLabel = document.getElementById('today-date');
+  const button = document.getElementById('today-refresh');
+  let entries;
   try {
-    await renderFresh(new Date());
-  } catch (err) {
-    gridWrapper.innerHTML = `<p class="empty-state">Could not compute today's seeds: ${esc(err.message)}</p>`;
-    return;
+    const response = await fetch('catalog.json');
+    if (!response.ok) throw new Error('Catalog unavailable');
+    entries = (await response.json()).games;
+  } catch {
+    if (button) button.disabled = true;
+    return; // Preserve the published seeds and their explicitly labelled UTC date.
   }
-
-  if (REFRESH_BUTTON) REFRESH_BUTTON.addEventListener('click', () => { refresh(); });
+  async function refresh() {
+    const now = new Date();
+    const strips = await computeTodayStrips(now, entries);
+    for (const strip of strips) {
+      const tile = document.getElementById(strip.id);
+      if (!tile) continue;
+      tile.querySelector('.strip-seed code').textContent = strip.seedValue;
+      tile.querySelector('.strip-ask').textContent = strip.ask;
+      tile.querySelector('.play-link').href = strip.url;
+    }
+    dateLabel.textContent = `${utcDateString(now)} UTC`;
+  }
+  const update = () => refresh().catch(() => { dateLabel.textContent += ' — update unavailable'; });
+  await update();
+  if (button) button.addEventListener('click', update);
 }
 
 if (typeof document !== 'undefined' && document.getElementById('today-list')) {

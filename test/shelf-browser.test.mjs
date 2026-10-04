@@ -1,3 +1,5 @@
+import { discoverCatalog } from '../src/discover-catalog.mjs';
+const discovered = discoverCatalog();
 // shelf-browser.test — headless tests for the terminal shelf browser (scripts/shelf-browser.mjs +
 // src/shelf/*.mjs). Every test here scripts KEYS against the REAL catalog.json (the same file
 // index.html/today.html read, loaded fresh off disk exactly the way smoke.test.mts's own
@@ -17,14 +19,13 @@ import { fileURLToPath } from 'node:url';
 
 import { loadGames, groupByShelf, flattenForList, listLabel } from '../src/shelf/catalog.mjs';
 import { initialState, step, dispatchLaunch } from '../src/shelf/state.mjs';
-import { planLaunch, DURANTE_TERMINAL_BIN, FARSTONE_CLIENT_BIN } from '../src/shelf/launch.mjs';
+import { planLaunch, DURANTE_TERMINAL_BIN } from '../src/shelf/launch.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..');
 
 async function loadRealCatalog() {
-  const raw = await readFile(path.join(ROOT, 'catalog.json'), 'utf8');
-  return JSON.parse(raw);
+  return (await discovered).catalog;
 }
 
 const DOWN = { name: 'down' };
@@ -116,25 +117,10 @@ test('Enter on durante dispatches a SPAWN plan for durante-terminal.mjs, resolve
   assert.ok(fs.existsSync(DURANTE_TERMINAL_BIN), 'the resolved durante-terminal.mjs path is a real file on disk');
 });
 
-test('Enter on farstone dispatches a SPAWN plan for Farstone\'s own terminal client, resolved and present on disk, never executed', async () => {
-  const catalog = await loadRealCatalog();
-  const games = loadGames(catalog);
-  const farstone = games.find((g) => g.id === 'farstone');
-  assert.ok(farstone, 'the real catalog has a farstone entry');
-
-  const entries = flattenForList(groupByShelf(games));
-  let state = initialState(entries);
-  for (let i = 0; i < entries.length && state.entries[state.selected].game.id !== 'farstone'; i++) state = step(state, DOWN);
-  assert.equal(state.entries[state.selected].game.id, 'farstone');
-
-  state = step(state, ENTER);
-  const { plan } = dispatchLaunch(state);
-  assert.deepEqual(plan, {
-    kind: 'spawn',
-    cmd: 'node',
-    args: [FARSTONE_CLIENT_BIN, '--base', `https://${farstone.hostname || `${farstone.subdomain}.561.group`}`],
-  }, 'dispatchLaunch resolves farstone to the EXACT expected spawn plan — Farstone owns the REST/JSON adapter');
-  assert.ok(fs.existsSync(FARSTONE_CLIENT_BIN), 'the resolved Farstone terminal-client bin is a real file on disk');
+test('Farstone keeps its browser and API record without inventing a missing terminal client', async () => {
+  const farstone = (await loadRealCatalog()).games.find((game) => game.id === 'farstone');
+  assert.ok(farstone.entryPoints.headless.includes('POST /connect'));
+  assert.deepEqual(planLaunch(farstone), { kind: 'print', text: 'https://farstone.561.group/' });
 });
 
 test('Enter on a browser-only game prints its URL and does NOT spawn anything', async () => {
@@ -208,12 +194,10 @@ test('q and Ctrl-C both set quit, and quit takes priority — a scripted key seq
   assert.equal(afterCtrlC.quit, true);
 });
 
-test('findMonorepoRoot resolves both sibling bin paths to real files under the same checkout', () => {
+test('findMonorepoRoot resolves the available terminal client in this checkout', () => {
   // launch.mjs's findMonorepoRoot() walks up from its own location to a `.git` directory and joins
   // the repo-relative paths from there — this is the end-to-end proof that the traversal actually
   // lands on real files, independent of exactly how many directories deep either path is.
   assert.ok(fs.existsSync(DURANTE_TERMINAL_BIN), 'durante-terminal.mjs resolves to a real file');
-  assert.ok(fs.existsSync(FARSTONE_CLIENT_BIN), 'farstone.mjs resolves to a real file');
   assert.ok(DURANTE_TERMINAL_BIN.endsWith('durante-terminal.mjs'));
-  assert.ok(FARSTONE_CLIENT_BIN.endsWith(path.join('farstone-services-section', 'apps', 'terminal-client', 'bin', 'farstone.mjs')));
 });

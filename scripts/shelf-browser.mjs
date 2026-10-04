@@ -8,12 +8,12 @@
 //   node scripts/shelf-browser.mjs
 //
 // keys: ↑/↓ select a game (shelf headers are skipped)  PgUp/PgDn scroll the detail pane
-//       Enter launch (durante/farstone: a real terminal session, taking over this terminal until
+//       Enter launch (durante: a real terminal session, taking over this terminal until
 //       you quit it; anything else with a browser entry point: prints its URL and returns here;
 //       nothing launchable: says so)  q / Ctrl-C quit
 //
 // The catalog is fetched live from https://play.561.group/catalog.json; if that fails (offline dev,
-// DNS), this falls back to the catalog.json sitting right next to this bin (same source of truth
+// DNS), this discovers authored local game records (same source of truth
 // the deployed storefront serves, just read off disk instead of over HTTP).
 //
 // All the NAVIGATION and LAUNCH-PLANNING logic lives in src/shelf/*.mjs as pure functions (no
@@ -22,33 +22,29 @@
 // imperative shell: fetch the catalog once, run arnold's Screen, translate keys through state.step,
 // and actually execute whatever dispatchLaunch() decided.
 
-import path from "node:path";
-import fs from "node:fs";
-import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 import { Screen } from "@red-cup-engineering/arnold/app";
 import { stack, flex } from "@red-cup-engineering/arnold/layout";
 import { box, text, list, textViewport, statusLine, wrap } from "@red-cup-engineering/arnold/widgets";
 
+import { discoverCatalog } from "../src/discover-catalog.mjs";
 import { loadGames, groupByShelf, flattenForList, listLabel, detailText } from "../src/shelf/catalog.mjs";
 import { initialState, step, dispatchLaunch } from "../src/shelf/state.mjs";
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
 const CATALOG_URL = process.env.SHELF_CATALOG_URL || "https://play.561.group/catalog.json";
-const LOCAL_CATALOG = path.join(HERE, "..", "catalog.json");
+
 
 async function loadCatalog() {
   try {
     const res = await fetch(CATALOG_URL, { signal: AbortSignal.timeout(4000) });
     if (res.ok) return await res.json();
-  } catch { /* offline, DNS failure, or a non-2xx — fall back to the local file below */ }
-  const raw = await fs.promises.readFile(LOCAL_CATALOG, "utf8");
-  return JSON.parse(raw);
+  } catch { /* offline, DNS failure, or a non-2xx — discover the actual local sources */ }
+  return (await discoverCatalog()).catalog;
 }
 
 // runChild(screen, cmd, args) — hand the real terminal to a child process and get it back. The
-// child (durante-terminal.mjs or wheatstone's scripts/farstone.mjs) owns stdin/stdout/stderr directly
+// child (durante-terminal.mjs) owns stdin/stdout/stderr directly
 // (`stdio: "inherit"`) and may itself run an arnold Screen with its own alt-screen/raw-mode
 // lifecycle; this process's own Screen is stopped first so the two never fight over the terminal,
 // and `screen.shown` is cleared afterward so the next render is a FULL repaint rather than a diff

@@ -1,3 +1,6 @@
+import { readPublication } from './publication.mjs';
+import { discoverCatalog } from '../src/discover-catalog.mjs';
+const discovered = discoverCatalog();
 // A real reading-order check on the built index.html/today.html -- not a grep for whether
 // a string like "aria-labelledby" merely appears somewhere in the file, but a check of
 // actual document POSITION: landmark order, whether a skip link's target id really exists,
@@ -23,8 +26,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..');
 
 async function loadCatalogEntries() {
-  const raw = await readFile(path.join(ROOT, 'catalog.json'), 'utf8');
-  return JSON.parse(raw).games;
+  return (await discovered).catalog.games;
 }
 
 /** Every `<section class="tufte-tile" id="...">`'s id, in the order it appears in `html`. */
@@ -98,31 +100,31 @@ function checkSingleH1PrecedesEveryH2(html) {
 }
 
 test('index.html: skip link, landmark order, and per-tile aria-labelledby all hold under a real position check', async () => {
-  const html = await readFile(path.join(ROOT, 'index.html'), 'utf8');
+  const html = await readPublication('index.html');
   await checkLandmarkAndSkipLinkOrder(html, 'catalog-grid');
   checkEachTileLabelledbyResolvesInsideItself(html);
   checkSingleH1PrecedesEveryH2(html);
 });
 
 test('index.html: rendered tile source order matches catalog.json\'s own entry order exactly -- the authored-order-is-DOM-order invariant, checked structurally', async () => {
-  const html = await readFile(path.join(ROOT, 'index.html'), 'utf8');
+  const html = await readPublication('index.html');
   const entries = await loadCatalogEntries();
   assert.deepEqual(tileIdsInSourceOrder(html), entries.map((entry) => entry.id));
 });
 
 test('today.html: skip link, landmark order, and per-tile aria-labelledby all hold under a real position check', async () => {
-  const html = await readFile(path.join(ROOT, 'today.html'), 'utf8');
+  const html = await readPublication('today.html');
   await checkLandmarkAndSkipLinkOrder(html, 'today-list');
   checkEachTileLabelledbyResolvesInsideItself(html);
   checkSingleH1PrecedesEveryH2(html);
 });
 
 test("today.html: rendered strip source order matches js/today.mjs's own authored strip order exactly (today.html's ritual ordering is intentionally its own -- not catalog.json's array order, the same way it already was before this rebuild) -- and that set is exactly catalog.json's daily-utc entries", async () => {
-  const html = await readFile(path.join(ROOT, 'today.html'), 'utf8');
+  const html = await readPublication('today.html');
   const entries = await loadCatalogEntries();
   const dailyIds = new Set(entries.filter((entry) => entry.seedPolicy && entry.seedPolicy.kind === 'daily-utc').map((entry) => entry.id));
 
-  const model = await computeTodayModel(new Date());
+  const model = await computeTodayModel(new Date(), (await discovered).catalog.games);
   const authoredOrder = model.tiles.map((tile) => tile.id);
   assert.deepEqual(new Set(authoredOrder), dailyIds, "today.mjs's own strip set must exactly match catalog.json's daily-utc entries");
   assert.deepEqual(tileIdsInSourceOrder(html), authoredOrder, "rendered DOM order must match js/today.mjs's own authored tile order exactly");
@@ -130,7 +132,7 @@ test("today.html: rendered strip source order matches js/today.mjs's own authore
 
 test('every tufte-tile in both pages carries data-role/data-lifecycle/data-confidence as attributes only -- never leaking into an aria-* attribute, which would be a false accessibility signal with no real screen-reader translation', async () => {
   for (const file of ['index.html', 'today.html']) {
-    const html = await readFile(path.join(ROOT, file), 'utf8');
+    const html = await readPublication(file);
     assert.ok(!/aria-role=|aria-lifecycle=|aria-confidence=/.test(html), `${file} must never invent a non-standard aria-* attribute from tile vocabulary fields`);
   }
 });

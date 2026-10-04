@@ -1,7 +1,6 @@
 // play.561.group's one catalog projection: manifest entry -> TUFTE tile -> browser controls.
 // It has one consumer, so it stays here rather than carrying a package boundary of its own.
 import { GLYPHS, FALLBACK_GLYPH, EXTERNAL_LINK_ICON, TERMINAL_ICON } from './glyphs.mjs';
-import { LIVE_SUBDOMAINS } from './live-subdomains.mjs';
 
 export { GLYPHS, FALLBACK_GLYPH, EXTERNAL_LINK_ICON, TERMINAL_ICON };
 
@@ -12,7 +11,7 @@ export function esc(str) {
 }
 
 export function statusLabel(status) {
-  return status === 'playable' ? 'Playable' : 'In development';
+  return status === 'playable' ? 'Reported playable' : 'In development';
 }
 
 export function hostname(entry) {
@@ -31,9 +30,9 @@ export function hasBrowser(entry) {
   return Boolean(entry.entryPoints && entry.entryPoints.browser);
 }
 
-export function canPlayLive(entry) {
+export function browserAvailable(entry) {
   return entry.status === 'playable' && hasBrowser(entry)
-    && LIVE_SUBDOMAINS.has(entry.hostname || entry.subdomain);
+    && entry.availability?.state === 'reachable';
 }
 
 export function catalogCardBodyHtml(entry) {
@@ -44,9 +43,10 @@ export function catalogCardBodyHtml(entry) {
   const headlessBadge = hasHeadless(entry)
     ? `<span class="badge headless" title="${esc(entry.entryPoints.headless)}">${TERMINAL_ICON} API / terminal play</span>`
     : '';
-  const actionLink = canPlayLive(entry)
-    ? `<a class="play-link" href="${esc(playUrl(entry))}">${EXTERNAL_LINK_ICON} Play at ${esc(hostname(entry))}</a>`
-    : '<span class="play-link" aria-disabled="true">Not yet deployed</span>';
+  const actionLink = hasBrowser(entry)
+    ? `<a class="play-link" href="${esc(playUrl(entry))}">${EXTERNAL_LINK_ICON} ${browserAvailable(entry) ? 'Open' : 'Visit'} ${esc(entry.displayName)}</a>`
+    : '<span class="play-link">No browser entry</span>';
+  const pageStatus = entry.availability?.state === 'reachable' ? 'Page reached' : entry.availability?.state === 'unavailable' ? 'Page unavailable' : 'Page not checked';
 
   return `
     <div class="card-head"><span class="card-glyph">${glyph}</span></div>
@@ -55,9 +55,11 @@ export function catalogCardBodyHtml(entry) {
       <span class="badge ${playable ? 'playable' : 'in-development'}">${statusLabel(entry.status)}</span>
       ${headlessBadge}
     </div>
+    ${hasHeadless(entry) ? `<details class="headless-interface"><summary>Read the API or terminal interface</summary><code>${esc(entry.entryPoints.headless)}</code></details>` : ''}
     ${entry.statusNote ? `<p class="status-note">${esc(entry.statusNote)}</p>` : ''}
     <ul class="keywords">${keywords}</ul>
     <div class="card-actions">${actionLink}<span class="subdomain-hint">${esc(hostname(entry))}</span></div>
+    ${entry.availability?.checkedAt ? `<p class="availability-note">${pageStatus} at ${esc(entry.availability.checkedAt.slice(0, 16).replace('T', ' '))} UTC.</p>` : ''}
   `;
 }
 
@@ -67,7 +69,7 @@ export function catalogEntryToTile(entry) {
     title: entry.displayName,
     eyebrow: entry.shelf,
     lifecycle: entry.status === 'in-development' ? 'imminent' : 'present',
-    confidence: canPlayLive(entry) ? 'high' : 'low',
+    confidence: browserAvailable(entry) ? 'high' : 'low',
     html: catalogCardBodyHtml(entry),
   };
 }
@@ -117,10 +119,6 @@ export function filtersToSearchParams(filters) {
 // Browser-only bootstrap below this line. Nothing above here touches `document`.
 // ---------------------------------------------------------------------------------------
 
-function renderEmptyState(gridWrapper) {
-  gridWrapper.innerHTML = '<div class="tufte-grid"><p class="empty-state">No games match your filters.</p></div>';
-}
-
 /** Wires up index.html's progressively enhanced search/status/shelf controls. The static
  *  SSR grid remains readable without JavaScript; with JavaScript, the current filter is
  *  represented in the URL so it can be shared and restored by browser history. */
@@ -128,7 +126,6 @@ export async function initCatalogPage() {
   const gridWrapper = document.getElementById('catalog-grid');
   if (!gridWrapper) return; // not on index.html -- safe no-op import elsewhere
 
-  const { renderTufteFragment } = await import('@red-cup-engineering/web-page-tiling-engine');
 
   const COUNT = document.getElementById('result-count');
   const SEARCH = document.getElementById('search');
@@ -138,12 +135,9 @@ export async function initCatalogPage() {
   if (!COUNT || !SEARCH || !SHELF || !STATUS_BUTTONS.length) return;
 
   function render(entries) {
-    if (entries.length) {
-      gridWrapper.innerHTML = renderTufteFragment(catalogModel(entries));
-    } else {
-      renderEmptyState(gridWrapper);
-    }
-    COUNT.textContent = `${entries.length} game${entries.length === 1 ? '' : 's'}`;
+    const visible = new Set(entries.map((entry) => entry.id));
+    for (const tile of gridWrapper.querySelectorAll('.tufte-tile')) tile.hidden = !visible.has(tile.id);
+    COUNT.textContent = entries.length ? `${entries.length} game${entries.length === 1 ? '' : 's'}` : 'No games match your filters.';
   }
 
   let allEntries = [];
@@ -184,7 +178,7 @@ export async function initCatalogPage() {
     allEntries = Array.isArray(catalog.games) ? catalog.games : [];
     hydrated = true;
   } catch (err) {
-    // The grid build.mjs already server-rendered stays visible and fully readable --
+    // The published grid stays visible and fully readable --
     // losing live search/filter on a fetch failure is a real degradation, but it is
     // never a blank page the way a full client-only render used to be.
     if (SEARCH) {

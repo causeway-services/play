@@ -1,36 +1,42 @@
-// Generates catalog.json from per-game catalog-entry.json manifests, so the
-// storefront's game list has exactly one source of truth: the game's own
-// service directory, not a hand-maintained file here that drifts.
-//
-// Each game carries a `catalog-entry.json` at the root of its service
-// directory. It is either a complete catalog entry, or a small storefront
-// sidecar naming the executable cartridge manifest with `cartridgeManifest`.
-// In the latter case the executable manifest owns the game rules, replay
-// contract, and browser/headless endpoints; the sidecar owns only shelf
-// metadata. `repoPath` is always derived from where the entry was found.
-//
-// This script does two jobs:
-//   1. Collect: recursively find every catalog-entry.json under the known
-//      game-home roots, parse it, and derive repoPath from its location.
-//   2. Verify: for any entry claiming cartridgeWrapped:true, actually check
-//      the tree -- stat the replayVerifier's file and import-check that its
-//      named export exists, and stat intentLog.schemaRef's file when present.
-//      A manifest that asserts a wrapping the code doesn't have is a build
-//      error, not a silent catalog.json that lies about it (see: the
-//      flickering-delve entry this generator replaced, which kept claiming
-//      cartridgeWrapped:true and a replayVerifier pointing at a
-//      src/cartridge.manifest.mts that had already been deleted).
-//
-// Run directly (`node scripts/build-catalog.mjs`) to regenerate catalog.json.
-// Import `buildCatalog()` (as test/catalog-generation.test.mts does) to get
-// the assembled object/JSON without writing anything.
-
-import { glob, readFile, stat, writeFile } from 'node:fs/promises';
+import { readFile, stat, access } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { playUrl, hasBrowser } from '../js/catalog.mjs';
+
+/** Observe an HTML entry page; HTTP success is not a game-operation proof. */
+export async function observeBrowserPages(games, { fetchImpl = fetch, checkedAt = new Date().toISOString() } = {}) {
+  let next = 0;
+  const observations = new Array(games.length);
+  await Promise.all(Array.from({ length: Math.min(6, games.length) }, async () => {
+    for (;;) {
+      const index = next++;
+      if (index >= games.length) return;
+      const game = games[index];
+      if (!hasBrowser(game)) { observations[index] = game; continue; }
+      const url = playUrl(game);
+      let availability;
+      try {
+        const response = await fetchImpl(url, {
+          headers: { accept: 'text/html', 'user-agent': '561-Group-Shelf/1.0' },
+          signal: AbortSignal.timeout(5000),
+        });
+        const html = /^text\/html(?:;|$)/i.test(response.headers.get('content-type') ?? '');
+        availability = { state: response.ok && html ? 'reachable' : 'unavailable', url, checkedAt, httpStatus: response.status };
+        if (response.url && response.url !== url) availability.finalUrl = response.url;
+        await response.body?.cancel();
+      } catch {
+        availability = { state: 'unavailable', url, checkedAt, reason: 'request-failed' };
+      }
+      observations[index] = { ...game, availability };
+    }
+  }));
+  return observations;
+}
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const SITE_ROOT = path.join(HERE, '..');
+
 
 // The monorepo root that the catalog's repoPath values are written relative to, and the Group's
 // own directory beneath it. Found by locating the Group's directory in this file's own path
@@ -48,28 +54,6 @@ const GAME_SITE_ROOT = path.join(
   GROUP_ROOT,
   'services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites',
 );
-
-// Known trees where a game's service directory can live. Games move between
-// directories inside these roots over time (see: the 2026-08-19 game-homes
-// move); the manifest-per-game design means that only ever changes where a
-// manifest is *found*, never a hand-typed path someone has to remember to
-// update. Adding a whole new game-home tree (not just a new game inside an
-// existing one) is the only reason to touch this list.
-const SEARCH_ROOTS = [
-  GAME_SITE_ROOT,
-  path.join(
-    GROUP_ROOT,
-    'services/science-services-section/services/philosophy-services-section/services/relationality-services-section/services/agency-services-section/services/being-services-section/services/doing-services-section/services/playing-services-section/services/gaming-services-section/services/board-games-services-section/services/weiqi-services-section',
-  ),
-  path.join(
-    GROUP_ROOT,
-    'services/public-services-section/services/public-computer-services-section/services/public-web-services-section/services/public-web-game-services-section/services',
-  ),
-  path.join(
-    GROUP_ROOT,
-    'services/public-services-section/services/public-publishing-services-section/services/public-computer-publishing-services-section/services/public-system-computer-publishing-section/services/public-web-publishing-services-section/sites',
-  ),
-];
 
 const MANIFEST_FILENAME = 'catalog-entry.json';
 // `dist` is a reproducible Worker-asset publication, not another game home.
@@ -97,13 +81,36 @@ const ORDER = [
   'aletheon',
 ];
 
-async function findManifests(root) {
-  const found = [];
-  for await (const relativePath of glob(`**/${MANIFEST_FILENAME}`, {
-    cwd: root,
-    exclude: [...SKIP_DIR_NAMES].map((name) => `**/${name}/**`),
-  })) found.push(path.join(root, relativePath));
-  return found;
+// A public game can be authored in a pinned submodule. Read its actual Git
+// object when this checkout has not materialized it; never substitute an old
+// generated catalog, or silently lose the game because its directory is empty.
+const git = promisify(execFile);
+async function pinnedGameRecords() {
+  const run = async (args) => (await git('git', ['-C', REPO_ROOT, ...args], { maxBuffer: 1024 * 1024 })).stdout.trim();
+  const relativeRoot = path.relative(REPO_ROOT, GAME_SITE_ROOT);
+  const links = (await run(['ls-tree', '-r', 'HEAD', '--', relativeRoot])).split('\n').filter((line) => line.startsWith('160000 '));
+  if (!links.length) return [];
+  const configuration = await run(['config', '-f', '.gitmodules', '--get-regexp', '^submodule\\..*\\.path$']);
+  const names = new Map(configuration.split('\n').map((line) => {
+    const [, name, location] = /^submodule\.(.+)\.path (.+)$/.exec(line);
+    return [location, name];
+  }));
+  const common = path.resolve(REPO_ROOT, await run(['rev-parse', '--git-common-dir']));
+  const records = [];
+  for (const link of links) {
+    const [, commit, location] = /^160000 commit ([a-f0-9]+)\t(.+)$/.exec(link);
+    const homeDir = path.join(REPO_ROOT, location);
+    try { await access(path.join(homeDir, MANIFEST_FILENAME)); continue; } catch {}
+    const name = names.get(location);
+    if (!name) throw new Error(`submodule ${location} has no source configuration`);
+    const moduleDir = path.join(common, 'modules', name);
+    const moduleGit = async (...args) => (await git('git', ['--git-dir', moduleDir, ...args], { maxBuffer: 1024 * 1024 })).stdout;
+    // Missing pinned objects are a missing source, not evidence that the game vanished.
+    const manifest = await moduleGit('ls-tree', '--name-only', commit, '--', MANIFEST_FILENAME);
+    if (!manifest.trim()) continue;
+    records.push({ homeDir, raw: await moduleGit('show', `${commit}:${MANIFEST_FILENAME}`) });
+  }
+  return records;
 }
 
 /** Splits "relative/path.mts#exportName" into its two halves. */
@@ -168,16 +175,19 @@ async function verifyEntry(entry, homeDir) {
     throw new Error(`${entry.id}: cartridgeWrapped:true requires replayVerifier`);
   }
   const { filePart, exportName } = splitRef(entry.replayVerifier);
-  const absPath = path.join(homeDir, filePart);
+  const moduleUrl = filePart.startsWith('@')
+    ? import.meta.resolve(filePart)
+    : pathToFileURL(path.join(homeDir, filePart)).href;
   try {
-    await stat(absPath);
+    await stat(fileURLToPath(moduleUrl));
   } catch {
-    throw new Error(`${entry.id}: replayVerifier file does not exist: ${filePart} (resolved ${absPath})`);
+    throw new Error(`${entry.id}: replayVerifier module does not exist: ${filePart}`);
   }
+
   if (exportName) {
     let mod;
     try {
-      mod = await import(pathToFileURL(absPath).href);
+      mod = await import(moduleUrl);
     } catch (err) {
       throw new Error(`${entry.id}: replayVerifier file failed to import (${filePart}): ${err.message}`);
     }
@@ -208,22 +218,24 @@ function orderIndex(id) {
 
 /** Collects every catalog-entry.json manifest, verifies cartridgeWrapped:true
  *  claims against the tree, and assembles catalog.json's shape. Never writes
- *  anything -- callers (the CLI block below, or a test) decide what to do
+ *  anything -- publication and local readers decide what to do
  *  with the result. */
-export async function buildCatalog({ generatedDate } = {}) {
-  const manifestPaths = (
-    await Promise.all(SEARCH_ROOTS.map((root) => findManifests(root)))
-  ).flat();
+export async function discoverCatalog({ generatedDate, observePages = false, fetchImpl, checkedAt } = {}) {
+  const pattern = `:(glob)${path.relative(REPO_ROOT, GROUP_ROOT)}/**/${MANIFEST_FILENAME}`;
+  const { stdout } = await git('git', ['-C', REPO_ROOT, 'ls-files', '--cached', '--others', '--exclude-standard', '--deduplicate', '-z', '--', pattern], { maxBuffer: 1024 * 1024 });
+  const locations = stdout.split('\0').filter(Boolean).filter((location) => !location.split('/').some((part) => SKIP_DIR_NAMES.has(part)));
+  const records = (await Promise.all(locations.map(async (location) => {
+    const manifestPath = path.join(REPO_ROOT, location);
+    try { return { homeDir: path.dirname(manifestPath), raw: await readFile(manifestPath, 'utf8') }; }
+    catch (error) { if (error.code === 'ENOENT') return undefined; throw error; }
+  }))).filter(Boolean);
+  records.push(...await pinnedGameRecords());
+  if (!records.length) throw new Error('found zero authored game records');
 
-  if (manifestPaths.length === 0) {
-    throw new Error('found zero catalog-entry.json manifests under the known search roots');
-  }
-
-  const games = [];
+  let games = [];
   const seenIds = new Set();
-  for (const manifestPath of manifestPaths) {
-    const homeDir = path.dirname(manifestPath);
-    const raw = await readFile(manifestPath, 'utf8');
+  for (const { homeDir, raw } of records) {
+    const manifestPath = path.join(homeDir, MANIFEST_FILENAME);
     let manifest;
     try {
       manifest = JSON.parse(raw);
@@ -250,7 +262,7 @@ export async function buildCatalog({ generatedDate } = {}) {
     const siteName = !siteRelative.startsWith('..') && !path.isAbsolute(siteRelative)
       ? siteRelative.split(path.sep)[0]
       : undefined;
-    const hostname = siteName?.endsWith('.play.561.group') ? siteName : undefined;
+    const hostname = siteName?.endsWith('.561.group') ? siteName : undefined;
     games.push({ ...manifest, ...(hostname ? { hostname } : {}), repoPath });
   }
 
@@ -258,10 +270,11 @@ export async function buildCatalog({ generatedDate } = {}) {
     const diff = orderIndex(a.id) - orderIndex(b.id);
     return diff !== 0 ? diff : a.id.localeCompare(b.id);
   });
+  if (observePages) games = await observeBrowserPages(games, { fetchImpl, checkedAt });
 
   const catalog = {
     $schemaNote:
-      "One cartridge-manifest-shaped entry per game, validated against the real, published @red-cup-engineering/gaming/running's validateGameManifest by test/smoke.test.mts (full strict validation when cartridgeWrapped is true, an honest subset check otherwise). A field this catalog can't fill in yet is omitted, never set to null. status, statusNote, cartridgeWrapped, energyBankWrapped, and shelf are storefront-only extensions, not part of the manifest spec.",
+      "Game metadata and declared replay contracts are collected from their authored records. Page reachability is observed separately and does not prove that a game works.",
     generated: generatedDate ?? new Date().toISOString().slice(0, 10),
     games,
   };
@@ -271,9 +284,4 @@ export async function buildCatalog({ generatedDate } = {}) {
   const publicCatalog = { ...catalog, games: games.map(({ repoPath: _internal, ...entry }) => entry) };
   const json = JSON.stringify(publicCatalog, null, 2) + '\n';
   return { catalog, json };
-}
-
-if (import.meta.main) {
-  const { json } = await buildCatalog();
-  await writeFile(path.join(SITE_ROOT, 'catalog.json'), json, 'utf8');
 }

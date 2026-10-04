@@ -1,3 +1,6 @@
+import { readPublication } from './publication.mjs';
+import { discoverCatalog } from '../src/discover-catalog.mjs';
+const discovered = discoverCatalog();
 // Behavioral tests for play.561.group -- node --test. Verifies: catalog.json parses and every
 // entry is shaped like a CartridgeManifest plus this site's storefront-only extensions
 // (cartridgeWrapped:true entries validated against the real published
@@ -23,8 +26,7 @@ const STATUS_VALUES = new Set(['playable', 'in-development']);
 const SHELF_VALUES = new Set(['Card Table', 'Puzzle Den', 'Study', 'Deep', 'Stars', 'substrate', 'unshelved']);
 
 async function loadCatalog() {
-  const raw = await readFile(path.join(ROOT, 'catalog.json'), 'utf8');
-  return JSON.parse(raw);
+  return (await discovered).catalog;
 }
 
 function isNonEmptyString(v) {
@@ -192,7 +194,7 @@ test('every catalog entry matches the honest subset of the CartridgeManifest sha
 });
 
 test("index.html loads no remote script/stylesheet (its catalog cards' own play-link anchors may legitimately point at real *.561.group subdomains -- since the TUFTE rebuild, index.html server-renders those links directly, the same honest reason today.html's own anchors are allowed to)", async () => {
-  const html = await readFile(path.join(ROOT, 'index.html'), 'utf8');
+  const html = await readPublication('index.html');
 
   assert.ok(!/<script[^>]+src="https?:/i.test(html), 'index.html must not load a script from a CDN');
   assert.ok(!/<link[^>]+href="https?:/i.test(html), 'index.html must not load a stylesheet from a CDN');
@@ -211,7 +213,7 @@ test("index.html loads no remote script/stylesheet (its catalog cards' own play-
 });
 
 test('today.html loads no remote script/stylesheet (its anchor hrefs may legitimately point at real *.561.group subdomains -- that is the whole point of the page)', async () => {
-  const html = await readFile(path.join(ROOT, 'today.html'), 'utf8');
+  const html = await readPublication('today.html');
 
   assert.ok(!/<script[^>]+src="https?:/i.test(html), 'today.html must not load a script from a CDN');
   assert.ok(!/<link[^>]+href="https?:/i.test(html), 'today.html must not load a stylesheet from a CDN');
@@ -231,81 +233,7 @@ test("js/today.mjs's strips match exactly catalog.json's daily-utc entries", asy
   assert.ok(dailyIds.length > 0, 'expected at least one daily-utc catalog entry');
 
   const js = await readFile(path.join(ROOT, 'js', 'today.mjs'), 'utf8');
-  const ids = [...js.matchAll(/id:\s*'([a-z-]+)'/g)].map((m) => m[1]);
+  const { computeTodayStrips } = await import('../js/today.mjs');
+  const ids = (await computeTodayStrips(new Date(), catalog.games)).map((strip) => strip.id);
   assert.deepEqual(new Set(ids), new Set(dailyIds));
-});
-
-test('serve.mjs serves index.html, catalog.json, css, and js over real HTTP', async () => {
-  process.env.PORT = '0'; // ephemeral port -- never collide with a real running instance
-  process.env.HOST = '127.0.0.1';
-  const { server } = await import(pathToFileURL(path.join(ROOT, 'serve.mjs')).href);
-
-  await new Promise((resolve) => {
-    if (server.listening) return resolve(undefined);
-    server.once('listening', () => resolve(undefined));
-  });
-
-  const address = server.address();
-  const base = `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`;
-
-  // The 'listening' event fires when the socket is bound, but under some sandboxed
-  // network stacks the very first connection attempt can land a beat before the
-  // listener is actually accepting -- retry briefly rather than flake on that gap.
-  async function fetchWithRetry(url, attempts = 10) {
-    let lastErr;
-    for (let i = 0; i < attempts; i += 1) {
-      try {
-        return await fetch(url);
-      } catch (err) {
-        lastErr = err;
-        await new Promise((resolve) => setTimeout(resolve, 25));
-      }
-    }
-    throw lastErr;
-  }
-
-  try {
-    const indexRes = await fetchWithRetry(`${base}/`);
-    assert.equal(indexRes.status, 200);
-    assert.equal(indexRes.headers.get('cache-control'), 'no-cache');
-    assert.match(indexRes.headers.get('content-type') ?? '', /text\/html/);
-    const indexBody = await indexRes.text();
-    assert.match(indexBody, /play<span class="domain">\.561\.group<\/span>/);
-
-    const catalogRes = await fetch(`${base}/catalog.json`);
-    assert.equal(catalogRes.status, 200);
-    assert.match(catalogRes.headers.get('content-type') ?? '', /application\/json/);
-    const catalogBody = await catalogRes.json();
-    assert.ok(Array.isArray(catalogBody.games));
-
-    const cssRes = await fetch(`${base}/css/style.css`);
-    assert.equal(cssRes.status, 200);
-    assert.match(cssRes.headers.get('content-type') ?? '', /text\/css/);
-
-    const jsRes = await fetch(`${base}/js/catalog.mjs`);
-    assert.equal(jsRes.status, 200);
-    assert.match(jsRes.headers.get('content-type') ?? '', /javascript/);
-
-    const todayRes = await fetch(`${base}/today.html`);
-    assert.equal(todayRes.status, 200);
-    assert.match(todayRes.headers.get('content-type') ?? '', /text\/html/);
-    const todayBody = await todayRes.text();
-    assert.match(todayBody, /today<span class="domain">\.561\.group<\/span>/);
-
-    const todayJsRes = await fetch(`${base}/js/today.mjs`);
-    assert.equal(todayJsRes.status, 200);
-    assert.match(todayJsRes.headers.get('content-type') ?? '', /javascript/);
-
-    const glyphsRes = await fetch(`${base}/js/glyphs.mjs`);
-    assert.equal(glyphsRes.status, 200);
-    assert.match(glyphsRes.headers.get('content-type') ?? '', /javascript/);
-
-    const missingRes = await fetch(`${base}/does-not-exist.html`);
-    assert.equal(missingRes.status, 404);
-
-    const traversalRes = await fetch(`${base}/../../etc/passwd`);
-    assert.notEqual(traversalRes.status, 200);
-  } finally {
-    await new Promise((resolve) => server.close(() => resolve(undefined)));
-  }
 });

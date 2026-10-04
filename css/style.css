@@ -288,9 +288,7 @@ main {
   border-color: var(--badge-dev-fg);
 }
 
-/* confidence="low": entry.status is "playable" but its subdomain isn't one the router
- * actually routes yet (see LIVE_SUBDOMAINS in js/catalog.mjs/js/today.mjs) -- visually
- * reinforces, never duplicates, the "Not yet deployed" pill already inside the tile body. */
+/* A last page check failed; the authored address remains available to try. */
 .tufte-tile[data-confidence="low"] {
   opacity: 0.78;
   border-style: dashed;
@@ -489,7 +487,7 @@ footer.site-footer {
   border-radius: 4px;
 }
 
-/* ---------- today.html: one strip (a role="rail" TUFTE tile) per live daily game ---------- */
+/* ---------- today.html: one strip (a role="rail" TUFTE tile) per supported daily seed ---------- */
 
 .today-toolbar {
   display: flex;
@@ -597,3 +595,7 @@ footer.site-footer {
   padding: 0.1rem 0.35rem;
   border-radius: 4px;
 }
+
+[hidden] { display: none !important; }
+.availability-note { font-size: .85rem; color: var(--fg-muted); }
+.headless-interface code { display: block; margin-top: .5rem; overflow-wrap: anywhere; }

@@ -2,22 +2,22 @@
   "name": "@causeway-services/play",
   "version": "0.1.0",
   "type": "module",
-  "description": "play.561.group -- Causeway Services' progressively enhanced game shelf, generated from @red-cup-engineering/gaming/running manifests.",
+  "description": "Cowrie Games: discover authored games and courses, browser entries, terminal/API interfaces, and shared UTC daily seeds.",
   "scripts": {
-    "generate-catalog": "node scripts/build-catalog.mjs",
-    "build": "npm run generate-catalog && node build.mjs && node scripts/stage-public.mjs",
-    "serve": "node serve.mjs",
+    "build": "static-site-publisher build content public --config=victor.config.mjs",
+    "serve": "wrangler dev",
     "shelf": "node scripts/shelf-browser.mjs",
     "test": "node --test test/*.test.mjs",
     "deploy": "npm run build && wrangler deploy",
-    "dev": "wrangler dev"
+    "dev": "npm run build && wrangler dev"
   },
   "dependencies": {
     "@red-cup-engineering/arnold": "0.3.0",
     "@red-cup-engineering/gaming": "0.1.0",
-    "@red-cup-engineering/javascript-node-services-section": "0.3.0",
     "@red-cup-engineering/web-page-tiling-engine": "0.12.0",
-    "sirv": "3.0.2"
+    "@red-cup-engineering/static-site-publisher": "0.1.15",
+    "@red-cup-engineering/weiqi-engine": "0.3.0",
+    "esbuild": "0.28.1"
   },
   "devDependencies": {
     "wrangler": "4.123.0"
