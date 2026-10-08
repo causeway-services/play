@@ -12,11 +12,11 @@
     "dev": "npm run build && wrangler dev"
   },
   "dependencies": {
-    "@red-cup-engineering/arnold": "0.3.0",
-    "@red-cup-engineering/gaming": "0.1.0",
-    "@red-cup-engineering/web-page-tiling-engine": "0.12.0",
-    "@red-cup-engineering/static-site-publisher": "0.1.15",
-    "@red-cup-engineering/weiqi-engine": "0.3.0",
+    "@red-cup-engineering/arnold": "workspace:*",
+    "@red-cup-engineering/gaming": "workspace:*",
+    "@red-cup-engineering/web-page-tiling-engine": "workspace:*",
+    "@red-cup-engineering/static-site-publisher": "workspace:*",
+    "@red-cup-engineering/weiqi-engine": "workspace:*",
     "esbuild": "0.28.1"
   },
   "devDependencies": {
