@@ -1,6 +1,6 @@
 import { readPublication } from './publication.mjs';
 // Verifies the house ad footer slot (live integration with
-// @red-cup-engineering/advertising-services-section, v0): a contextual-only
+// @red-cup-engineering/web-advertising-system-engineering-services-section, v0): a contextual-only
 // client-fetched slot, no cookies, self-excluding for play-561-group, and
 // never a remote script/stylesheet tag (honest-links stays satisfied).
 

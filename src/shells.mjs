@@ -2,7 +2,7 @@ import { shelfValues } from '../js/catalog.mjs';
 
 
 
-// House ad server (@red-cup-engineering/advertising-services-section), v0
+// House ad server (@red-cup-engineering/web-advertising-system-engineering-services-section), v0
 // served at ads.561.group. The footer slot fetches its creative
 // client-side, at property="play-561-group", so it self-excludes and
 // never advertises play.561.group on its own page.
