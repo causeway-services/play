@@ -1,4 +1,4 @@
-import { readFile, stat, access } from 'node:fs/promises';
+import { readFile, stat, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFile } from 'node:child_process';
@@ -61,6 +61,15 @@ const MANIFEST_FILENAME = 'catalog-entry.json';
 // authored manifest that the generator is meant to project.
 const SKIP_DIR_NAMES = new Set(['node_modules', '.git', 'test', 'tests', 'dist']);
 
+// lib/legacy retains source history, including retired catalog entries. Those
+// bytes remain available as evidence, but are not a game's current source home.
+// Match that structural boundary, not game IDs or a list of today's games.
+function isCurrentSourceLocation(location) {
+  const parts = location.split('/');
+  return !parts.some((part, index) => SKIP_DIR_NAMES.has(part)
+    || (part === 'lib' && parts[index + 1] === 'legacy'));
+}
+
 // Display order for today's known games. A manifest for a game not listed
 // here still gets collected and included -- it's appended after these,
 // alphabetically by id -- so a brand-new game shows up the moment it grows a
@@ -82,13 +91,14 @@ const ORDER = [
 ];
 
 // A public game can be authored in a pinned submodule. Read its actual Git
-// object when this checkout has not materialized it; never substitute an old
-// generated catalog, or silently lose the game because its directory is empty.
+// object whether or not this checkout has materialized it; never substitute a
+// dirty worktree or retained catalog, or lose the game because its mount is empty.
 const git = promisify(execFile);
 async function pinnedGameRecords() {
   const run = async (args) => (await git('git', ['-C', REPO_ROOT, ...args], { maxBuffer: 1024 * 1024 })).stdout.trim();
   const relativeRoot = path.relative(REPO_ROOT, GAME_SITE_ROOT);
-  const links = (await run(['ls-tree', '-r', 'HEAD', '--', relativeRoot])).split('\n').filter((line) => line.startsWith('160000 '));
+  const links = (await run(['ls-tree', '-r', 'HEAD', '--', relativeRoot])).split('\n')
+    .filter((line) => line.startsWith('160000 ') && isCurrentSourceLocation(line.slice(line.indexOf('\t') + 1)));
   if (!links.length) return [];
   const configuration = await run(['config', '-f', '.gitmodules', '--get-regexp', '^submodule\\..*\\.path$']);
   const names = new Map(configuration.split('\n').map((line) => {
@@ -100,11 +110,27 @@ async function pinnedGameRecords() {
   for (const link of links) {
     const [, commit, location] = /^160000 commit ([a-f0-9]+)\t(.+)$/.exec(link);
     const homeDir = path.join(REPO_ROOT, location);
-    try { await access(path.join(homeDir, MANIFEST_FILENAME)); continue; } catch {}
     const name = names.get(location);
     if (!name) throw new Error(`submodule ${location} has no source configuration`);
-    const moduleDir = path.join(common, 'modules', name);
+    let moduleDir = path.join(common, 'modules', name);
     const moduleGit = async (...args) => (await git('git', ['--git-dir', moduleDir, ...args], { maxBuffer: 1024 * 1024 })).stdout;
+    try {
+      await moduleGit('cat-file', '-e', `${commit}^{commit}`);
+    } catch {
+      // A child may be an ordinary nested clone rather than an absorbed
+      // submodule. Prove its Git root is this exact mount before using it:
+      // git -C on an empty mount can otherwise discover the parent repository.
+      try {
+        const childRoot = (await git('git', ['-C', homeDir, 'rev-parse', '--show-toplevel'])).stdout.trim();
+        if (await realpath(childRoot) !== await realpath(homeDir)) {
+          throw new Error('materialized Git root is not the declared child');
+        }
+        moduleDir = (await git('git', ['-C', homeDir, 'rev-parse', '--absolute-git-dir'])).stdout.trim();
+        await moduleGit('cat-file', '-e', `${commit}^{commit}`);
+      } catch (error) {
+        throw new Error(`submodule ${location}: pinned source ${commit} is unavailable (${error.message})`);
+      }
+    }
     // Missing pinned objects are a missing source, not evidence that the game vanished.
     const manifest = await moduleGit('ls-tree', '--name-only', commit, '--', MANIFEST_FILENAME);
     if (!manifest.trim()) continue;
@@ -223,7 +249,7 @@ function orderIndex(id) {
 export async function discoverCatalog({ generatedDate, observePages = false, fetchImpl, checkedAt } = {}) {
   const pattern = `:(glob)${path.relative(REPO_ROOT, GROUP_ROOT)}/**/${MANIFEST_FILENAME}`;
   const { stdout } = await git('git', ['-C', REPO_ROOT, 'ls-files', '--cached', '--others', '--exclude-standard', '--deduplicate', '-z', '--', pattern], { maxBuffer: 1024 * 1024 });
-  const locations = stdout.split('\0').filter(Boolean).filter((location) => !location.split('/').some((part) => SKIP_DIR_NAMES.has(part)));
+  const locations = stdout.split('\0').filter(Boolean).filter(isCurrentSourceLocation);
   const records = (await Promise.all(locations.map(async (location) => {
     const manifestPath = path.join(REPO_ROOT, location);
     try { return { homeDir: path.dirname(manifestPath), raw: await readFile(manifestPath, 'utf8') }; }
