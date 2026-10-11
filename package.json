@@ -1,0 +1,43 @@
+{
+  "name": "@causeway-services/play",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Cowrie Games: discover authored games and courses, browser entries, terminal/API interfaces, and shared UTC daily seeds.",
+  "scripts": {
+    "build": "static-site-publisher build content public --config=victor.config.mjs",
+    "serve": "wrangler dev",
+    "shelf": "node scripts/shelf-browser.mjs",
+    "test": "node --test test/*.test.mjs",
+    "deploy": "npm run build && wrangler deploy",
+    "dev": "npm run build && wrangler dev"
+  },
+  "dependencies": {
+    "@red-cup-engineering/arnold": "workspace:*",
+    "@red-cup-engineering/gaming": "workspace:*",
+    "@red-cup-engineering/web-page-tiling-engine": "workspace:*",
+    "@red-cup-engineering/static-site-publisher": "workspace:*",
+    "@red-cup-engineering/weiqi-engine": "workspace:*",
+    "esbuild": "0.28.1"
+  },
+  "devDependencies": {
+    "wrangler": "4.123.0"
+  },
+  "engines": {
+    "node": ">=24.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/causeway-services/public-media-services-section.git",
+    "directory": "services/public-games-services-section/services/public-web-games-services-section/sites/play.561.group"
+  },
+  "exports": {
+    "./catalog": "./src/discover-catalog.mjs",
+    "./catalog-presentation": "./js/catalog.mjs",
+    "./publication": "./src/publication.mjs",
+    "./composition": "./src/composition.mjs",
+    "./terminal-launch": "./src/shelf/launch.mjs",
+    "./terminal-catalog": "./src/shelf/load-catalog.mjs",
+    "./chrome/*": "./chrome/*",
+    "./package.json": "./package.json"
+  }
+}

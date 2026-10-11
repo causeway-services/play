@@ -1,0 +1,601 @@
+/* play.561.group -- austere, SVG-first, zero-dependency stylesheet. */
+
+:root {
+  --bg: #f7f6f3;
+  --bg-raised: #ffffff;
+  --fg: #1a1a18;
+  --fg-muted: #5c5a54;
+  --border: #ddd9d0;
+  --accent: #a3402a;
+  --accent-fg: #fff8f4;
+  --badge-playable-bg: #e4efe2;
+  --badge-playable-fg: #2f5c2a;
+  --badge-dev-bg: #f3ecd9;
+  --badge-dev-fg: #7a5a12;
+  --focus-ring: #a3402a;
+  --code-bg: #eeece5;
+  --shadow: 0 1px 2px rgba(20, 18, 14, 0.06), 0 4px 14px rgba(20, 18, 14, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16150f;
+    --bg-raised: #1e1c15;
+    --fg: #f1efe6;
+    --fg-muted: #a8a396;
+    --border: #35322a;
+    --accent: #e08a5c;
+    --accent-fg: #1a1207;
+    --badge-playable-bg: #1e2f1a;
+    --badge-playable-fg: #a6d69b;
+    --badge-dev-bg: #332a10;
+    --badge-dev-fg: #e0c26a;
+    --focus-ring: #e08a5c;
+    --code-bg: #262319;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+  padding: 0;
+  margin: -1px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--accent);
+  color: var(--accent-fg);
+  padding: 0.5rem 1rem;
+  z-index: 10;
+}
+
+.skip-link:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+}
+
+header.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 2rem 1.5rem 1.5rem;
+}
+
+.header-inner {
+  max-width: 68rem;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.mark {
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: var(--accent);
+}
+
+.brand-wordmark {
+  margin: 0 0 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.title-block h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+}
+
+.title-block .domain {
+  color: var(--fg-muted);
+  font-weight: 400;
+}
+
+.tagline {
+  margin: 0.35rem 0 0;
+  color: var(--fg-muted);
+  max-width: 46rem;
+  font-size: 0.95rem;
+}
+
+.header-nav {
+  margin-left: auto;
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+.today-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--accent);
+  color: var(--accent-fg);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+main {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 1.75rem 1.5rem 4rem;
+}
+
+.controls {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.controls input[type="search"] {
+  flex: 1 1 16rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-raised);
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+
+.shelf-filter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.shelf-filter-label select {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-raised);
+  color: var(--fg);
+  padding: 0.4rem 0.55rem;
+  font: inherit;
+}
+
+.status-filter {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.status-filter button {
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--fg);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.status-filter button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: var(--accent);
+}
+
+.result-count {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+  margin: 0 0 1rem;
+}
+
+/* ---------- TUFTE tile grid (index.html's catalog cards, today.html's strips) ----------
+ * Rendered via @red-cup-engineering/web-page-tiling-engine's renderTufteFragment,
+ * which ships ONLY `<div class="tufte-grid">...<section class="tufte-tile">...</div>` --
+ * no CSS of its own in fragment mode. Everything below is this storefront's own styling,
+ * off this storefront's own tokens (--bg-raised/--border/--fg/--fg-muted/--shadow), not
+ * TUFTE's --tufte-* palette -- TUFTE is the rendering/patching engine here, not a reskin.
+ * catalog-grid-wrap/today-list-wrap (the #catalog-grid/#today-list divs in index.html/
+ * today.html) exist only to carry the id the skip link targets and an aria-label the
+ * region itself is named by -- renderTufteFragment's own outer div has neither. */
+.catalog-grid-wrap,
+.today-list-wrap {
+  display: block;
+}
+
+.tufte-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-flow: dense;
+  gap: 1.1rem;
+  align-items: start;
+}
+
+.tufte-tile {
+  grid-column: span var(--tile-span, 4);
+  min-width: 0;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.15rem 1.2rem 1.3rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* Only role=now/rail/aside carry a dedicated column span -- every other value (including
+ * the documented default "standard") is deliberately unstyled here, matching TUFTE's own
+ * shipped CSS surface (see docs/handbook.md's "tile vocabulary semantics" chapter in the
+ * TUFTE package). Catalog cards never set a role (peers in a repeating grid); today's
+ * strips always set role="rail" because they are, today, genuinely one-per-row. */
+.tufte-tile[data-role="now"] {
+  grid-column: span 8;
+}
+
+.tufte-tile[data-role="rail"] {
+  grid-column: span 12;
+}
+
+.tufte-tile[data-role="aside"] {
+  grid-column: span 4;
+}
+
+/* lifecycle="imminent": reuses --badge-dev-fg (already amber, already meaning "not live
+ * yet" via the existing "In development" badge) -- no new color for the same idea. Inert
+ * today (every current catalog entry is status:"playable"), ready the day one isn't. */
+.tufte-tile[data-lifecycle="imminent"] {
+  border-color: var(--badge-dev-fg);
+}
+
+/* A last page check failed; the authored address remains available to try. */
+.tufte-tile[data-confidence="low"] {
+  opacity: 0.78;
+  border-style: dashed;
+}
+
+.tufte-tile header {
+  margin-bottom: 0.1rem;
+}
+
+.tufte-tile h2 {
+  margin: 0.1rem 0 0;
+  font-size: 1.15rem;
+}
+
+.tufte-eyebrow {
+  margin: 0 0 0.2rem;
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tufte-tile-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
+}
+
+.tufte-tile-body > :first-child {
+  margin-top: 0;
+}
+
+.tufte-tile-body > :last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 40rem) {
+  .tufte-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tufte-tile,
+  .tufte-tile[data-role="now"],
+  .tufte-tile[data-role="rail"],
+  .tufte-tile[data-role="aside"] {
+    grid-column: 1 / -1;
+  }
+}
+
+.card-glyph {
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--accent);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.desc {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 0.92rem;
+  flex: 1;
+}
+
+.badges {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+}
+
+.badge.playable {
+  background: var(--badge-playable-bg);
+  color: var(--badge-playable-fg);
+}
+
+.badge.in-development {
+  background: var(--badge-dev-bg);
+  color: var(--badge-dev-fg);
+}
+
+.badge.headless {
+  background: var(--code-bg);
+  color: var(--fg);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.badge.headless svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.status-note {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  margin: 0;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.3rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.play-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--accent);
+  color: var(--accent-fg);
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.play-link svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.play-link[aria-disabled="true"] {
+  background: var(--code-bg);
+  color: var(--fg-muted);
+  cursor: default;
+  pointer-events: none;
+}
+
+.subdomain-hint {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+}
+
+.keywords {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-top: 0.2rem;
+}
+
+.keyword {
+  font-size: 0.72rem;
+  color: var(--fg-muted);
+  background: var(--code-bg);
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.empty-state {
+  color: var(--fg-muted);
+  padding: 2rem 0;
+}
+
+footer.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem;
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+}
+
+.footer-inner {
+  max-width: 68rem;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-inner code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+/* ---------- today.html: one strip (a role="rail" TUFTE tile) per supported daily seed ---------- */
+
+.today-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.today-toolbar .result-count {
+  margin: 0;
+}
+
+#today-refresh {
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--fg);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+#today-refresh:hover,
+#today-refresh:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.today-list-wrap .tufte-grid {
+  margin: 0 0 1.75rem;
+}
+
+.strip-head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.strip-ask {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 0.95rem;
+  max-width: 46rem;
+}
+
+.strip-seed {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+}
+
+.strip-seed .seed-label {
+  margin-right: 0.4rem;
+}
+
+.strip-seed code {
+  background: var(--code-bg);
+  color: var(--fg);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  word-break: break-all;
+}
+
+.strip-links {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.2rem;
+}
+
+.dev-link {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--border);
+}
+
+.dev-link:hover,
+.dev-link:focus-visible {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.dev-link .dev-hint {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  color: var(--fg-muted);
+}
+
+.today-footnote {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+  max-width: 46rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.today-footnote code {
+  background: var(--code-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+[hidden] { display: none !important; }
+.availability-note { font-size: .85rem; color: var(--fg-muted); }
+.headless-interface code { display: block; margin-top: .5rem; overflow-wrap: anywhere; }
