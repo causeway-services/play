@@ -1,5 +1,78 @@
 # play.561.group
 
+## Current source composition
+
+This complete application lives under Public Media's declared Public Games child.
+Its package metadata names that existing repository and directory. Source receiving,
+installed provider composition, successful builds, deployment, and public observation
+remain separate. The sections below retain historical usage details; current scripts
+and explicit source inputs described here govern the portable interface.
+
+Consumers can import `@causeway-services/play/catalog` (`discoverCatalog` and
+`readGitCatalogSources`) and `@causeway-services/play/catalog-presentation`
+(`playUrl`, `hasBrowser`, and the existing presentation helpers). Importing these
+surfaces does not require a machine-specific Group checkout or execute game code.
+
+`discoverCatalog({sources, generatedDate, observePages: false})` receives a nonempty
+array of local Git source bindings. Every binding provides:
+
+- `repositoryRoot`: the absolute, exact root of an existing Git checkout
+- `catalogRoots`: nonempty repository-relative directories containing authored records
+- `gameSiteRoots`: explicit repository-relative directories containing game gitlinks;
+  use an explicit empty array for a source with no such children
+- optional `repository`: the caller's nonempty repository identity label
+
+Roots cannot escape their checkout. Each supplied source must contribute an authored
+record; missing roots, listed-but-missing records and missing pinned objects refuse
+composition. Worktree catalog records must be regular files whose resolved location
+stays inside the declared roots; file symlinks and redirected outside ancestors refuse
+before reading record bytes. This is a source-custody check, not a hostile-filesystem
+sandbox guarantee. An intentional staged deletion is no longer enumerated by Git. Ordinary
+records still include tracked and nonignored untracked files, excluding generated/test
+directories and retained `lib/legacy` history. Pinned child records come from their
+exact gitlink commits in either materialization state. Duplicate IDs still refuse.
+
+Compose Public Games and external Science through separate bindings when they live
+in separate repositories. A Public Games-only binding does not prove that the external
+Science input was received. The caller must supply the complete received source set;
+the application neither invents a membership registry nor hardcodes today's games.
+The old integrated Group scan remains a lazy compatibility adapter for existing
+callers. Outside that layout, omitted sources refuse on discovery, not on import.
+
+The internal catalog retains `repoPath` and `catalogSource` (record path, Git HEAD,
+actual blob hash, worktree-versus-Git-object read, and child pin when applicable).
+The optional repository label is a caller binding, not a remote verification or
+canonical-admission receipt. A worktree record is not claimed to equal Git HEAD.
+Both internal provenance fields are omitted from public catalog JSON.
+
+`createShelfProjector({sources, date, observePages: false})` on the publication export
+binds these inputs to the existing static publisher. `victor.config.mjs` accepts an
+explicit JSON source array through `PLAY_CATALOG_SOURCES` and an optional real UTC
+date `PLAY_CATALOG_DATE=YYYY-MM-DD`. These are invocation inputs, not a persistent
+registry. The default publisher performs no page observations; unchecked pages are
+labelled not checked. A programmatic caller may explicitly request observations with
+the boolean `observePages: true`; nonboolean values refuse before source reads.
+
+The terminal application also accepts `PLAY_CATALOG_SOURCES`. Its default is local
+discovery, with no HTTP request. Setting `SHELF_CATALOG_URL` explicitly opts into the
+existing remote-read/local-fallback behavior. `SHELF_DURANTE_TERMINAL_BIN` supplies
+the received absolute Durante client path; the pure terminal-launch export accepts
+the same path as `planLaunch(game, {duranteTerminalBin})`. Without the integrated
+layout or an explicit client path, no terminal location is invented. Browser/API
+entries and the full authored terminal and chrome assets remain present.
+
+Provider versions are not selected by this interface. In particular, an older
+registry label does not qualify current Parlor or Weiqi replay contracts. Engineering
+implementations remain external. The actual full provider/game composition must be
+received before running the full suite or build; the portable tests use synthetic
+local Git inputs and no real game/provider execution, terminal spawn or HTTP request.
+
+Bounded controls:
+
+```
+node --test test/catalog-source-selection.test.mjs test/portable-composition.test.mjs
+```
+
 A progressively enhanced shelf for the 561 Group games catalog. It reads `catalog.json`
 (one cartridge-manifest-shaped entry per game, per the Cartridge and Energy Bank spec)
 and renders game cards with a static server-rendered baseline -- no framework, no CDN. Browser

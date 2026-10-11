@@ -12,9 +12,8 @@
 //       you quit it; anything else with a browser entry point: prints its URL and returns here;
 //       nothing launchable: says so)  q / Ctrl-C quit
 //
-// The catalog is fetched live from https://play.561.group/catalog.json; if that fails (offline dev,
-// DNS), this discovers authored local game records (same source of truth
-// the deployed storefront serves, just read off disk instead of over HTTP).
+// Authored local records are the default. SHELF_CATALOG_URL explicitly opts
+// into a remote read, with the existing local-source fallback on failure.
 //
 // All the NAVIGATION and LAUNCH-PLANNING logic lives in src/shelf/*.mjs as pure functions (no
 // Screen, no spawn, no fetch) precisely so it can be driven by scripted keys in a headless test
@@ -28,20 +27,14 @@ import { Screen } from "@red-cup-engineering/arnold/app";
 import { stack, flex } from "@red-cup-engineering/arnold/layout";
 import { box, text, list, textViewport, statusLine, wrap } from "@red-cup-engineering/arnold/widgets";
 
-import { discoverCatalog } from "../src/discover-catalog.mjs";
+import { loadShelfCatalog } from "../src/shelf/load-catalog.mjs";
+import { catalogSourcesFromEnvironment } from "../src/composition.mjs";
 import { loadGames, groupByShelf, flattenForList, listLabel, detailText } from "../src/shelf/catalog.mjs";
 import { initialState, step, dispatchLaunch } from "../src/shelf/state.mjs";
 
-const CATALOG_URL = process.env.SHELF_CATALOG_URL || "https://play.561.group/catalog.json";
-
-
-async function loadCatalog() {
-  try {
-    const res = await fetch(CATALOG_URL, { signal: AbortSignal.timeout(4000) });
-    if (res.ok) return await res.json();
-  } catch { /* offline, DNS failure, or a non-2xx — discover the actual local sources */ }
-  return (await discoverCatalog()).catalog;
-}
+const sources = catalogSourcesFromEnvironment();
+const launchOptions = process.env.SHELF_DURANTE_TERMINAL_BIN
+  ? { duranteTerminalBin: process.env.SHELF_DURANTE_TERMINAL_BIN } : undefined;
 
 // runChild(screen, cmd, args) — hand the real terminal to a child process and get it back. The
 // child (durante-terminal.mjs) owns stdin/stdout/stderr directly
@@ -87,7 +80,7 @@ function draw(state, heightRef) {
 }
 
 async function main() {
-  const catalog = await loadCatalog();
+  const catalog = await loadShelfCatalog({ sources, catalogUrl: process.env.SHELF_CATALOG_URL });
   const games = loadGames(catalog);
   const entries = flattenForList(groupByShelf(games));
 
@@ -103,7 +96,7 @@ async function main() {
     state = step(state, key, { detailHeight: heightRef.value });
     if (state.quit) { screen.stop(); process.exit(0); }
     if (state.launch) {
-      const { state: next, plan } = dispatchLaunch(state);
+      const { state: next, plan } = dispatchLaunch(state, launchOptions);
       state = next;
       if (plan?.kind === "spawn") runChild(screen, plan.cmd, plan.args);
     }

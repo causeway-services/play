@@ -1,4 +1,5 @@
-import { readFile, stat, realpath } from 'node:fs/promises';
+import { readFile, stat, lstat, realpath } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFile } from 'node:child_process';
@@ -38,22 +39,22 @@ export async function observeBrowserPages(games, { fetchImpl = fetch, checkedAt 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
 
-// The monorepo root that the catalog's repoPath values are written relative to, and the Group's
-// own directory beneath it. Found by locating the Group's directory in this file's own path
-// rather than counting ".." segments, so it survives this site itself moving to a new depth.
-const SEP = path.sep.replace(/[\\]/gu, '\\$&');
-const GROUP_MARKER = new RegExp(`${SEP}lib${SEP}[^${SEP}]+${SEP}services${SEP}561-group${SEP}`, 'u');
-const marker = GROUP_MARKER.exec(HERE);
-if (marker === null) {
-  throw new Error(`could not locate the Group's directory under lib/ in ${HERE} to determine the monorepo root`);
+// Compatibility for existing integrated callers is resolved only on request.
+// Importing the package never assumes a machine-specific checkout layout.
+function integratedSources() {
+  const marker = /[\\/]lib[\\/][^\\/]+[\\/]services[\\/]561-group[\\/]/u.exec(HERE);
+  if (marker === null) {
+    throw new Error('catalog sources are required outside an integrated Group checkout');
+  }
+  const repositoryRoot = HERE.slice(0, marker.index);
+  const group = HERE.slice(0, marker.index + marker[0].length);
+  return [{
+    repositoryRoot,
+    catalogRoots: [path.relative(repositoryRoot, group)],
+    gameSiteRoots: [path.relative(repositoryRoot, path.join(group,
+      'services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites'))],
+  }];
 }
-const REPO_ROOT = HERE.slice(0, marker.index);
-const GROUP_ROOT = HERE.slice(0, marker.index + marker[0].length);
-
-const GAME_SITE_ROOT = path.join(
-  GROUP_ROOT,
-  'services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites',
-);
 
 const MANIFEST_FILENAME = 'catalog-entry.json';
 // `dist` is a reproducible Worker-asset publication, not another game home.
@@ -94,10 +95,10 @@ const ORDER = [
 // object whether or not this checkout has materialized it; never substitute a
 // dirty worktree or retained catalog, or lose the game because its mount is empty.
 const git = promisify(execFile);
-async function pinnedGameRecords() {
-  const run = async (args) => (await git('git', ['-C', REPO_ROOT, ...args], { maxBuffer: 1024 * 1024 })).stdout.trim();
-  const relativeRoot = path.relative(REPO_ROOT, GAME_SITE_ROOT);
-  const links = (await run(['ls-tree', '-r', 'HEAD', '--', relativeRoot])).split('\n')
+async function pinnedGameRecords({ repositoryRoot, gameSiteRoots }) {
+  const run = async (args) => (await git('git', ['-C', repositoryRoot, ...args], { maxBuffer: 1024 * 1024 })).stdout.trim();
+  if (!gameSiteRoots.length) return [];
+  const links = (await run(['ls-tree', '-r', 'HEAD', '--', ...gameSiteRoots.map((root) => `:(literal)${root || '.'}`)])).split('\n')
     .filter((line) => line.startsWith('160000 ') && isCurrentSourceLocation(line.slice(line.indexOf('\t') + 1)));
   if (!links.length) return [];
   const configuration = await run(['config', '-f', '.gitmodules', '--get-regexp', '^submodule\\..*\\.path$']);
@@ -105,11 +106,11 @@ async function pinnedGameRecords() {
     const [, name, location] = /^submodule\.(.+)\.path (.+)$/.exec(line);
     return [location, name];
   }));
-  const common = path.resolve(REPO_ROOT, await run(['rev-parse', '--git-common-dir']));
+  const common = path.resolve(repositoryRoot, await run(['rev-parse', '--git-common-dir']));
   const records = [];
   for (const link of links) {
     const [, commit, location] = /^160000 commit ([a-f0-9]+)\t(.+)$/.exec(link);
-    const homeDir = path.join(REPO_ROOT, location);
+    const homeDir = path.join(repositoryRoot, location);
     const name = names.get(location);
     if (!name) throw new Error(`submodule ${location} has no source configuration`);
     let moduleDir = path.join(common, 'modules', name);
@@ -134,9 +135,75 @@ async function pinnedGameRecords() {
     // Missing pinned objects are a missing source, not evidence that the game vanished.
     const manifest = await moduleGit('ls-tree', '--name-only', commit, '--', MANIFEST_FILENAME);
     if (!manifest.trim()) continue;
-    records.push({ homeDir, raw: await moduleGit('show', `${commit}:${MANIFEST_FILENAME}`) });
+    records.push({ homeDir, raw: await moduleGit('show', `${commit}:${MANIFEST_FILENAME}`), sourcePath: `${location}/${MANIFEST_FILENAME}`, sourceCommit: commit, readFrom: 'git-object' });
   }
   return records;
+}
+
+/** Read existing local Git sources. Each binding names one real checkout and
+ * its declared catalog/game roots; it is not a catalog or an owner registry.
+ * Separate repositories (for example Public Games and Science) stay separate.
+ * A supplied empty/missing source fails rather than silently dropping a provider. */
+export async function readGitCatalogSources(sources) {
+  if (!Array.isArray(sources) || !sources.length) throw new Error('catalog sources must be a nonempty array');
+  const collected = [];
+  for (const source of sources) {
+    if (!source || !path.isAbsolute(source.repositoryRoot ?? '')) throw new Error('source repositoryRoot must be absolute');
+    if (source.repository !== undefined && (typeof source.repository !== 'string' || !source.repository.trim())) throw new Error('source repository identity must be a nonempty string when supplied');
+    const repositoryRoot = await realpath(source.repositoryRoot);
+    const run = async (...args) => (await git('git', ['-C', repositoryRoot, ...args], { maxBuffer: 1024 * 1024 })).stdout.trim();
+    if (await realpath(await run('rev-parse', '--show-toplevel')) !== repositoryRoot) {
+      throw new Error('source repositoryRoot must be the exact Git checkout root');
+    }
+    const sourceHead = await run('rev-parse', 'HEAD');
+    const roots = async (values, name, required) => {
+      if (!Array.isArray(values) || (required && !values.length)) throw new Error(`${name} must be ${required ? 'a nonempty' : 'an'} array`);
+      return Promise.all(values.map(async (value) => {
+        if (typeof value !== 'string' || !value || path.isAbsolute(value)) throw new Error(`${name} must contain relative directory paths`);
+        const absolute = await realpath(path.resolve(repositoryRoot, value));
+        const relative = path.relative(repositoryRoot, absolute);
+        if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) throw new Error(`${name} escapes its repository`);
+        if (!(await stat(absolute)).isDirectory()) throw new Error(`${name} must name directories`);
+        return relative.split(path.sep).join('/');
+      }));
+    };
+    const catalogRoots = await roots(source.catalogRoots, 'catalogRoots', true);
+    const gameSiteRoots = await roots(source.gameSiteRoots, 'gameSiteRoots', false);
+    const escapeGlob = (value) => value.replace(/[\\*?[\]]/g, '\\$&');
+    const patterns = catalogRoots.map((root) => `:(glob)${root ? `${escapeGlob(root)}/` : ''}**/${MANIFEST_FILENAME}`);
+    const { stdout } = await git('git', ['-C', repositoryRoot, 'ls-files', '--cached', '--others', '--exclude-standard', '--deduplicate', '-z', '--', ...patterns], { maxBuffer: 1024 * 1024 });
+    const locations = stdout.split('\0').filter(Boolean).filter(isCurrentSourceLocation);
+    const records = (await Promise.all(locations.map(async (location) => {
+      const manifestPath = path.join(repositoryRoot, location);
+      try {
+        // Source custody is the declared checkout/root, not whatever a file or
+        // ancestor symlink happens to lead to. Validate before reading bytes.
+        if (!(await lstat(manifestPath)).isFile()) throw new Error(`catalog source record must be a regular file: ${location}`);
+        const resolved = await realpath(manifestPath);
+        const within = (root) => {
+          const relative = path.relative(path.resolve(repositoryRoot, root), resolved);
+          return relative !== '..' && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative);
+        };
+        if (!within('') || !catalogRoots.some(within)) throw new Error(`catalog source record escapes its declared roots: ${location}`);
+        return { homeDir: path.dirname(manifestPath), raw: await readFile(resolved, 'utf8'), sourcePath: location, readFrom: 'worktree' };
+      }
+      catch (error) {
+        if (error.code === 'ENOENT') throw new Error(`catalog source record is missing: ${location}`);
+        throw error;
+      }
+    }))).filter(Boolean);
+    records.push(...await pinnedGameRecords({ repositoryRoot, gameSiteRoots }));
+    if (!records.length) throw new Error(`catalog source has no authored records: ${source.repository ?? repositoryRoot}`);
+    for (const record of records) {
+      const bytes = Buffer.from(record.raw, 'utf8');
+      const blob = createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
+      collected.push({ ...record, repoPath: path.relative(repositoryRoot, record.homeDir).split(path.sep).join('/'), catalogSource: {
+        ...(source.repository === undefined ? {} : { repository: source.repository }), path: record.sourcePath, repositoryHead: sourceHead,
+        ...(record.readFrom === 'git-object' ? { pinnedCommit: record.sourceCommit } : {}), blob, readFrom: record.readFrom,
+      } });
+    }
+  }
+  return collected;
 }
 
 /** Splits "relative/path.mts#exportName" into its two halves. */
@@ -246,21 +313,13 @@ function orderIndex(id) {
  *  claims against the tree, and assembles catalog.json's shape. Never writes
  *  anything -- publication and local readers decide what to do
  *  with the result. */
-export async function discoverCatalog({ generatedDate, observePages = false, fetchImpl, checkedAt } = {}) {
-  const pattern = `:(glob)${path.relative(REPO_ROOT, GROUP_ROOT)}/**/${MANIFEST_FILENAME}`;
-  const { stdout } = await git('git', ['-C', REPO_ROOT, 'ls-files', '--cached', '--others', '--exclude-standard', '--deduplicate', '-z', '--', pattern], { maxBuffer: 1024 * 1024 });
-  const locations = stdout.split('\0').filter(Boolean).filter(isCurrentSourceLocation);
-  const records = (await Promise.all(locations.map(async (location) => {
-    const manifestPath = path.join(REPO_ROOT, location);
-    try { return { homeDir: path.dirname(manifestPath), raw: await readFile(manifestPath, 'utf8') }; }
-    catch (error) { if (error.code === 'ENOENT') return undefined; throw error; }
-  }))).filter(Boolean);
-  records.push(...await pinnedGameRecords());
-  if (!records.length) throw new Error('found zero authored game records');
+export async function discoverCatalog({ sources, generatedDate, observePages = false, fetchImpl, checkedAt } = {}) {
+  if (typeof observePages !== 'boolean') throw new TypeError('observePages must be boolean');
+  const records = await readGitCatalogSources(sources ?? integratedSources());
 
   let games = [];
   const seenIds = new Set();
-  for (const { homeDir, raw } of records) {
+  for (const { homeDir, raw, repoPath, catalogSource } of records) {
     const manifestPath = path.join(homeDir, MANIFEST_FILENAME);
     let manifest;
     try {
@@ -280,10 +339,9 @@ export async function discoverCatalog({ generatedDate, observePages = false, fet
 
     await verifyEntry(manifest, materialized.verificationHomeDir);
 
-    const repoPath = path.relative(REPO_ROOT, homeDir).split(path.sep).join('/');
     // The authored hostname (or subdomain's established *.561.group address)
     // owns public identity. Repository paths are provenance, never a route.
-    games.push({ ...manifest, repoPath });
+    games.push({ ...manifest, repoPath, catalogSource });
   }
 
   games.sort((a, b) => {
@@ -301,7 +359,7 @@ export async function discoverCatalog({ generatedDate, observePages = false, fet
 
   // repoPath is build-time provenance only (tests read it from `catalog`); the published
   // catalog.json never carries repository-internal paths.
-  const publicCatalog = { ...catalog, games: games.map(({ repoPath: _internal, ...entry }) => entry) };
+  const publicCatalog = { ...catalog, games: games.map(({ repoPath: _internal, catalogSource: _source, ...entry }) => entry) };
   const json = JSON.stringify(publicCatalog, null, 2) + '\n';
   return { catalog, json };
 }

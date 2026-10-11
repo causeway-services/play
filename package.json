@@ -24,5 +24,20 @@
   },
   "engines": {
     "node": ">=24"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/causeway-services/public-media-services-section.git",
+    "directory": "services/public-games-services-section/services/public-web-games-services-section/sites/play.561.group"
+  },
+  "exports": {
+    "./catalog": "./src/discover-catalog.mjs",
+    "./catalog-presentation": "./js/catalog.mjs",
+    "./publication": "./src/publication.mjs",
+    "./composition": "./src/composition.mjs",
+    "./terminal-launch": "./src/shelf/launch.mjs",
+    "./terminal-catalog": "./src/shelf/load-catalog.mjs",
+    "./chrome/*": "./chrome/*",
+    "./package.json": "./package.json"
   }
 }

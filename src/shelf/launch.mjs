@@ -52,16 +52,19 @@ const REPO_RELATIVE = {
   durante: "services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/durante.play.561.group/scripts/durante-terminal.mjs",
 };
 
-export const DURANTE_TERMINAL_BIN = path.join(GROUP_ROOT, REPO_RELATIVE.durante);
+export const DURANTE_TERMINAL_BIN = marker === null ? null : path.join(GROUP_ROOT, REPO_RELATIVE.durante);
 
 export function publicHostname(game) {
   return game.hostname || `${game.subdomain}.561.group`;
 }
 
 // planLaunch(game) -> LaunchPlan
-export function planLaunch(game) {
-  if (game.id === "durante" && fs.existsSync(DURANTE_TERMINAL_BIN)) {
-    return { kind: "spawn", cmd: "node", args: [DURANTE_TERMINAL_BIN, "--daily", "--base", `https://${publicHostname(game)}`] };
+export function planLaunch(game, { duranteTerminalBin = DURANTE_TERMINAL_BIN } = {}) {
+  if (duranteTerminalBin !== null && (typeof duranteTerminalBin !== 'string' || !path.isAbsolute(duranteTerminalBin))) {
+    throw new TypeError('duranteTerminalBin must be an absolute file path or null');
+  }
+  if (game.id === "durante" && duranteTerminalBin && fs.existsSync(duranteTerminalBin) && fs.statSync(duranteTerminalBin).isFile()) {
+    return { kind: "spawn", cmd: "node", args: [duranteTerminalBin, "--daily", "--base", `https://${publicHostname(game)}`] };
   }
   if (game.entryPoints?.browser) {
     return { kind: "print", text: `https://${publicHostname(game)}${game.entryPoints.browser}` };

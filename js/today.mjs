@@ -1,6 +1,6 @@
 // Pure daily-strip projection followed by the browser-only page bootstrap.
 
-import { esc, GLYPHS, FALLBACK_GLYPH, EXTERNAL_LINK_ICON, playUrl, browserAvailable } from './catalog.mjs';
+import { esc, GLYPHS, FALLBACK_GLYPH, EXTERNAL_LINK_ICON, playUrl, browserAvailable, publicationPageStatus } from './catalog.mjs';
 import { utcDateString, dailySeed } from '@red-cup-engineering/gaming/running/seed';
 
 export { esc, utcDateString };
@@ -111,9 +111,8 @@ export async function computeTodayStrips(date, entries = []) {
 
 function todayStripBodyHtml(strip) {
   const glyph = GLYPHS[strip.id] || FALLBACK_GLYPH;
-  const reached = browserAvailable(strip.game);
   const playLink = `<a class="play-link" href="${esc(strip.url)}">${EXTERNAL_LINK_ICON} Open ${esc(strip.name)}</a>`;
-  const pageStatus = reached ? 'Entry page reached at publication.' : 'Entry page unavailable at publication; you can still try its address.';
+  const pageStatus = publicationPageStatus(strip.game);
   return `
     <div class="strip-head">
       <span class="card-glyph">${glyph}</span>

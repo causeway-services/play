@@ -35,6 +35,12 @@ export function browserAvailable(entry) {
     && entry.availability?.state === 'reachable';
 }
 
+export function publicationPageStatus(entry) {
+  if (entry.availability?.state === 'reachable') return 'Entry page reached at publication.';
+  if (entry.availability?.state === 'unavailable') return 'Entry page unavailable at publication; you can still try its address.';
+  return 'Entry page not checked at publication; you can still try its address.';
+}
+
 export function catalogCardBodyHtml(entry) {
   const glyph = GLYPHS[entry.id] || FALLBACK_GLYPH;
   const playable = entry.status === 'playable';

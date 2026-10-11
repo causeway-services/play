@@ -58,9 +58,9 @@ export function step(state, key, opts = {}) {
 // nothing to launch. The caller (scripts/shelf-browser.mjs) is the only place that actually executes a
 // "spawn" plan or prints a "print" plan's text — this function only ever computes what SHOULD
 // happen, which is exactly what a test can assert without a real child process ever running.
-export function dispatchLaunch(state) {
+export function dispatchLaunch(state, launchOptions) {
   if (!state.launch) return { state, plan: null };
-  const plan = planLaunch(state.launch);
+  const plan = planLaunch(state.launch, launchOptions);
   const next = { ...state, launch: null, message: plan.kind === "print" ? plan.text : "" };
   return { state: next, plan };
 }

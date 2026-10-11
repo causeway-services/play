@@ -6,10 +6,11 @@ import { discoverCatalog } from './discover-catalog.mjs';
 import { catalogModel } from '../js/catalog.mjs';
 import { computeTodayModel } from '../js/today.mjs';
 import { indexHtml, todayHtml } from './shells.mjs';
+import { bindShelfProjector } from './composition.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-export async function publishShelf({ observePages = true, fetchImpl, date = new Date() } = {}) {
-  const { catalog, json } = await discoverCatalog({ generatedDate: date.toISOString().slice(0, 10), observePages, fetchImpl });
+export async function publishShelf({ sources, observePages = false, fetchImpl, date = new Date() } = {}) {
+  const { catalog, json } = await discoverCatalog({ sources, generatedDate: date.toISOString().slice(0, 10), observePages, fetchImpl });
   const entries = catalog.games;
   const daily = await computeTodayModel(date, entries);
   const artifacts = [
@@ -27,4 +28,5 @@ export async function publishShelf({ observePages = true, fetchImpl, date = new 
   return { artifacts };
 }
 
-export const shelfProjector = { name: 'game-shelf', priority: 15, project: () => publishShelf() };
+export const createShelfProjector = (options = {}) => bindShelfProjector(publishShelf, options);
+export const shelfProjector = createShelfProjector();

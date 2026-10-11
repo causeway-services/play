@@ -89,6 +89,7 @@ test('current and future authored records remain discoverable, including externa
   assert.deepEqual(new Set(catalog.games.map((game) => game.id)), new Set(['new-game', 'game-named-legacy', 'weiqi', 'untracked-game']));
   assert.equal(catalog.generated, '2000-01-01');
   assert.ok(catalog.games.every((game) => typeof game.repoPath === 'string'));
+  assert.ok(catalog.games.every((game) => !Object.values(game.catalogSource).includes(null)), 'legacy compatibility preserves the no-explicit-null provenance rule');
   assert.ok(JSON.parse(json).games.every((game) => !('repoPath' in game)));
 });
 
@@ -189,4 +190,27 @@ test('retained gitlinks do not require source configuration or pinned objects', 
   await commit(f.root);
   const { catalog } = await f.discover();
   assert.deepEqual(catalog.games.map((game) => game.id), ['current']);
+});
+
+test('the existing apex relative imports remain connected to integrated discovery', async (t) => {
+  const f = await fixture(t);
+  await f.record(`${SITES}/current`, record('current'));
+  await f.record(`${GROUP}/services/science-services-section/weiqi`, record('weiqi'));
+  const script = path.join(f.root, GROUP, 'services/561-group-services-section/sites/561.group/scripts/catalog-consumer.mjs');
+  await mkdir(path.dirname(script), { recursive: true });
+  // These two import specifiers are the current apex build's actual binding
+  // (BCF f28a15b9, build.mjs blob 2eb2e81ebdf0bfbdc1bd56e48f41d16029acde3d).
+  // This control calls discovery, never the build or any public endpoint.
+  await writeFile(script, `
+import { discoverCatalog } from "../../../../public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/play.561.group/src/discover-catalog.mjs";
+import { playUrl, hasBrowser } from "../../../../public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/play.561.group/js/catalog.mjs";
+export async function read() {
+  const { catalog } = await discoverCatalog({ generatedDate: '2000-01-01', fetchImpl() { throw new Error('network forbidden'); } });
+  return catalog.games.map((game) => ({ id: game.id, url: playUrl(game), browser: hasBrowser(game) }));
+}
+`);
+  const consumer = await import(pathToFileURL(script).href);
+  const entries = await consumer.read();
+  assert.deepEqual(new Set(entries.map((entry) => entry.id)), new Set(['current', 'weiqi']));
+  assert.ok(entries.every((entry) => entry.browser && entry.url.startsWith('https://')));
 });
