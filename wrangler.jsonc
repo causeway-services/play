@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "play-561-group",
+  "compatibility_date": "2026-08-04",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./public"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "routes": [
+    { "pattern": "play.561.group", "custom_domain": true }
+  ]
+}
