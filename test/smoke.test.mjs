@@ -239,7 +239,7 @@ test("js/today.mjs's strips match exactly catalog.json's daily-utc entries", asy
 });
 
 test('daily Solitaire follows its authored table and variant, with the same seed as the game', async () => {
-  const { dailySeed } = await import('../../solitaire.play.561.group/src/daily.mjs');
+  const { dailySeed } = await import('@red-cup-engineering/solitaire-561-group/daily');
   const { computeTodayStrips } = await import('../js/today.mjs');
   const game = (await loadCatalog()).games.find((entry) => entry.id === 'solitaire');
   const date = new Date('2026-10-03T23:59:59Z');
@@ -257,7 +257,7 @@ test('daily Solitaire follows its authored table and variant, with the same seed
 
 
 test('daily reel seed agrees with the game bootstrap without an invented config argument', async () => {
-  const { dailySeed } = await import('../../parlor.play.561.group/src/games/reels/daily.mjs');
+  const { dailySeed } = await import('@red-cup-engineering/parlor-service-561-group/reels/daily');
   const { computeTodayStrips } = await import('../js/today.mjs');
   const game = (await loadCatalog()).games.find(entry => entry.id === 'reels');
   const date = new Date('2026-10-04T12:00:00Z');

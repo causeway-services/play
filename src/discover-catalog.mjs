@@ -1,8 +1,7 @@
-import { readFile, stat, access } from 'node:fs/promises';
+import { stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
+import { readWorkspaceSourceFiles } from '@red-cup-engineering/git-services-section/workspace-source-files';
 import { playUrl, hasBrowser } from '../js/catalog.mjs';
 
 /** Observe an HTML entry page; HTTP success is not a game-operation proof. */
@@ -50,16 +49,11 @@ if (marker === null) {
 const REPO_ROOT = HERE.slice(0, marker.index);
 const GROUP_ROOT = HERE.slice(0, marker.index + marker[0].length);
 
-const GAME_SITE_ROOT = path.join(
-  GROUP_ROOT,
-  'services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites',
-);
-
 const MANIFEST_FILENAME = 'catalog-entry.json';
 // `dist` is a reproducible Worker-asset publication, not another game home.
 // Searching it would let a stale published copy shadow or duplicate the
 // authored manifest that the generator is meant to project.
-const SKIP_DIR_NAMES = new Set(['node_modules', '.git', 'test', 'tests', 'dist']);
+const SKIP_DIR_NAMES = new Set(['node_modules', '.git', 'test', 'tests', 'dist', 'legacy', 'history', '_archive', 'triage', 'vendor', 'lenticule-import']);
 
 // Display order for today's known games. A manifest for a game not listed
 // here still gets collected and included -- it's appended after these,
@@ -80,38 +74,6 @@ const ORDER = [
   'farstone',
   'aletheon',
 ];
-
-// A public game can be authored in a pinned submodule. Read its actual Git
-// object when this checkout has not materialized it; never substitute an old
-// generated catalog, or silently lose the game because its directory is empty.
-const git = promisify(execFile);
-async function pinnedGameRecords() {
-  const run = async (args) => (await git('git', ['-C', REPO_ROOT, ...args], { maxBuffer: 1024 * 1024 })).stdout.trim();
-  const relativeRoot = path.relative(REPO_ROOT, GAME_SITE_ROOT);
-  const links = (await run(['ls-tree', '-r', 'HEAD', '--', relativeRoot])).split('\n').filter((line) => line.startsWith('160000 '));
-  if (!links.length) return [];
-  const configuration = await run(['config', '-f', '.gitmodules', '--get-regexp', '^submodule\\..*\\.path$']);
-  const names = new Map(configuration.split('\n').map((line) => {
-    const [, name, location] = /^submodule\.(.+)\.path (.+)$/.exec(line);
-    return [location, name];
-  }));
-  const common = path.resolve(REPO_ROOT, await run(['rev-parse', '--git-common-dir']));
-  const records = [];
-  for (const link of links) {
-    const [, commit, location] = /^160000 commit ([a-f0-9]+)\t(.+)$/.exec(link);
-    const homeDir = path.join(REPO_ROOT, location);
-    try { await access(path.join(homeDir, MANIFEST_FILENAME)); continue; } catch {}
-    const name = names.get(location);
-    if (!name) throw new Error(`submodule ${location} has no source configuration`);
-    const moduleDir = path.join(common, 'modules', name);
-    const moduleGit = async (...args) => (await git('git', ['--git-dir', moduleDir, ...args], { maxBuffer: 1024 * 1024 })).stdout;
-    // Missing pinned objects are a missing source, not evidence that the game vanished.
-    const manifest = await moduleGit('ls-tree', '--name-only', commit, '--', MANIFEST_FILENAME);
-    if (!manifest.trim()) continue;
-    records.push({ homeDir, raw: await moduleGit('show', `${commit}:${MANIFEST_FILENAME}`) });
-  }
-  return records;
-}
 
 /** Splits "relative/path.mts#exportName" into its two halves. */
 function splitRef(ref) {
@@ -221,15 +183,22 @@ function orderIndex(id) {
  *  anything -- publication and local readers decide what to do
  *  with the result. */
 export async function discoverCatalog({ generatedDate, observePages = false, fetchImpl, checkedAt } = {}) {
-  const pattern = `:(glob)${path.relative(REPO_ROOT, GROUP_ROOT)}/**/${MANIFEST_FILENAME}`;
-  const { stdout } = await git('git', ['-C', REPO_ROOT, 'ls-files', '--cached', '--others', '--exclude-standard', '--deduplicate', '-z', '--', pattern], { maxBuffer: 1024 * 1024 });
-  const locations = stdout.split('\0').filter(Boolean).filter((location) => !location.split('/').some((part) => SKIP_DIR_NAMES.has(part)));
-  const records = (await Promise.all(locations.map(async (location) => {
-    const manifestPath = path.join(REPO_ROOT, location);
-    try { return { homeDir: path.dirname(manifestPath), raw: await readFile(manifestPath, 'utf8') }; }
-    catch (error) { if (error.code === 'ENOENT') return undefined; throw error; }
-  }))).filter(Boolean);
-  records.push(...await pinnedGameRecords());
+  // Source is held by game engineering, authored public publications and the
+  // science gaming owner. Discover their current contents, not a list of app names.
+  const owners = [
+    'services/engineering-services-section/services/computer-engineering-services-section/services/computer-systems-engineering-services-section/services/computer-game-system-services-section',
+    'services/public-services-section/services/public-media-services-section/services/public-games-services-section',
+    'services/science-services-section/services/philosophy-services-section/services/relationality-services-section/services/agency-services-section/services/being-services-section/services/doing-services-section/services/playing-services-section/services/gaming-services-section',
+  ];
+  const sources = (await Promise.all(owners.map(owner => readWorkspaceSourceFiles({
+    repository: REPO_ROOT,
+    filename: MANIFEST_FILENAME,
+    scope: path.relative(REPO_ROOT, path.join(GROUP_ROOT, owner)).split(path.sep).join('/'),
+    skipDirectories: [...SKIP_DIR_NAMES],
+  })))).flat();
+  const records = sources.map(({ path: location, raw }) => ({
+    homeDir: path.dirname(path.join(REPO_ROOT, location)), raw,
+  }));
   if (!records.length) throw new Error('found zero authored game records');
 
   let games = [];

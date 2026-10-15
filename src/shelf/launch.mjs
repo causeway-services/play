@@ -49,7 +49,7 @@ const GROUP_ROOT = marker === null ? ROOT : HERE.slice(0, marker.index + marker[
 
 // Paths relative to the Group's directory.
 const REPO_RELATIVE = {
-  durante: "services/public-services-section/services/public-media-services-section/services/public-games-services-section/services/public-web-games-services-section/sites/durante.play.561.group/scripts/durante-terminal.mjs",
+  durante: "services/engineering-services-section/services/computer-engineering-services-section/services/computer-systems-engineering-services-section/services/computer-game-system-services-section/apps/durante/scripts/durante-terminal.mjs",
 };
 
 export const DURANTE_TERMINAL_BIN = path.join(GROUP_ROOT, REPO_RELATIVE.durante);
