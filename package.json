@@ -18,12 +18,10 @@
     "@red-cup-engineering/static-site-publisher": "workspace:*",
     "@red-cup-engineering/weiqi-engine": "workspace:*",
     "esbuild": "0.28.1",
-    "@red-cup-engineering/git-services-section": "workspace:*"
+    "@red-cup-engineering/git-source-reading-service": "0.1.0"
   },
   "devDependencies": {
-    "wrangler": "4.123.0",
-    "@red-cup-engineering/solitaire-561-group": "workspace:*",
-    "@red-cup-engineering/parlor-service-561-group": "workspace:*"
+    "wrangler": "4.123.0"
   },
   "engines": {
     "node": ">=24"

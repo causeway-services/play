@@ -1,7 +1,7 @@
 import { stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { readWorkspaceSourceFiles } from '@red-cup-engineering/git-services-section/workspace-source-files';
+import { readRepositorySourceFiles } from '@red-cup-engineering/git-source-reading-service';
 import { playUrl, hasBrowser } from '../js/catalog.mjs';
 
 /** Observe an HTML entry page; HTTP success is not a game-operation proof. */
@@ -190,7 +190,7 @@ export async function discoverCatalog({ generatedDate, observePages = false, fet
     'services/public-services-section/services/public-media-services-section/services/public-games-services-section',
     'services/science-services-section/services/philosophy-services-section/services/relationality-services-section/services/agency-services-section/services/being-services-section/services/doing-services-section/services/playing-services-section/services/gaming-services-section',
   ];
-  const sources = (await Promise.all(owners.map(owner => readWorkspaceSourceFiles({
+  const sources = (await Promise.all(owners.map(owner => readRepositorySourceFiles({
     repository: REPO_ROOT,
     filename: MANIFEST_FILENAME,
     scope: path.relative(REPO_ROOT, path.join(GROUP_ROOT, owner)).split(path.sep).join('/'),
