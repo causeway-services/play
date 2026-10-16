@@ -1,6 +1,6 @@
 import { stat } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { readRepositorySourceFiles } from '@red-cup-engineering/git-source-reading-service';
 import { playUrl, hasBrowser } from '../js/catalog.mjs';
 
@@ -43,11 +43,8 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SEP = path.sep.replace(/[\\]/gu, '\\$&');
 const GROUP_MARKER = new RegExp(`${SEP}lib${SEP}[^${SEP}]+${SEP}services${SEP}561-group${SEP}`, 'u');
 const marker = GROUP_MARKER.exec(HERE);
-if (marker === null) {
-  throw new Error(`could not locate the Group's directory under lib/ in ${HERE} to determine the monorepo root`);
-}
-const REPO_ROOT = HERE.slice(0, marker.index);
-const GROUP_ROOT = HERE.slice(0, marker.index + marker[0].length);
+const DEFAULT_REPOSITORY_ROOT = marker === null ? undefined : HERE.slice(0, marker.index);
+const DEFAULT_GROUP_ROOT = marker === null ? undefined : HERE.slice(0, marker.index + marker[0].length);
 
 const MANIFEST_FILENAME = 'catalog-entry.json';
 // `dist` is a reproducible Worker-asset publication, not another game home.
@@ -75,7 +72,7 @@ const ORDER = [
   'aletheon',
 ];
 
-/** Splits "relative/path.mts#exportName" into its two halves. */
+/** Split a public package module reference and its named export. */
 function splitRef(ref) {
   const hashIndex = ref.lastIndexOf('#');
   if (hashIndex === -1) return { filePart: ref, exportName: undefined };
@@ -87,26 +84,18 @@ function splitRef(ref) {
  * place.  A sidecar may add storefront metadata, but may not shadow a field
  * the executable manifest already owns. */
 async function materializeCartridgeManifest(entry, homeDir) {
-  if (!entry.cartridgeManifest) return { entry, verificationHomeDir: homeDir };
+  if (!entry.cartridgeManifest) return { entry };
   if (typeof entry.cartridgeManifest !== 'string') {
     throw new Error(`${homeDir}: cartridgeManifest must be a string reference`);
   }
 
   const { filePart, exportName } = splitRef(entry.cartridgeManifest);
-  if (!filePart || !exportName) {
-    throw new Error(`${homeDir}: cartridgeManifest must be "file#namedExport"`);
+  if (!filePart?.startsWith('@') || !exportName) {
+    throw new Error(`${homeDir}: cartridgeManifest must name a public package export and named binding`);
   }
-  const verificationHomeDir = entry.cartridgeHome
-    ? path.resolve(homeDir, entry.cartridgeHome)
-    : homeDir;
-  if (entry.cartridgeHome !== undefined && typeof entry.cartridgeHome !== 'string') {
-    throw new Error(`${homeDir}: cartridgeHome must be a relative directory path`);
-  }
-  const absPath = path.join(verificationHomeDir, filePart);
   let mod;
   try {
-    await stat(absPath);
-    mod = await import(pathToFileURL(absPath).href);
+    mod = await import(filePart);
   } catch (err) {
     throw new Error(`${homeDir}: cartridgeManifest failed to load (${filePart}): ${err.message}`);
   }
@@ -122,7 +111,6 @@ async function materializeCartridgeManifest(entry, homeDir) {
   }
   return {
     entry: { ...cartridge, ...storefront, cartridgeWrapped: true },
-    verificationHomeDir,
   };
 }
 
@@ -130,16 +118,15 @@ async function materializeCartridgeManifest(entry, homeDir) {
  *  the tree, rather than trusting the manifest's own say-so. Throws with a
  *  clear, specific message on any failure -- a manifest that overclaims must
  *  fail the build, not silently ship a catalog that lies. */
-async function verifyEntry(entry, homeDir) {
+async function verifyEntry(entry) {
   if (entry.cartridgeWrapped !== true) return;
 
   if (!entry.replayVerifier) {
     throw new Error(`${entry.id}: cartridgeWrapped:true requires replayVerifier`);
   }
   const { filePart, exportName } = splitRef(entry.replayVerifier);
-  const moduleUrl = filePart.startsWith('@')
-    ? import.meta.resolve(filePart)
-    : pathToFileURL(path.join(homeDir, filePart)).href;
+  if (!filePart.startsWith('@')) throw new Error(`${entry.id}: replayVerifier must name a public package export`);
+  const moduleUrl = import.meta.resolve(filePart);
   try {
     await stat(fileURLToPath(moduleUrl));
   } catch {
@@ -164,7 +151,8 @@ async function verifyEntry(entry, homeDir) {
   // guarantee than the replayVerifier check above.
   if (entry.intentLog?.schemaRef) {
     const { filePart: schemaFile } = splitRef(entry.intentLog.schemaRef);
-    const schemaAbsPath = path.join(homeDir, schemaFile);
+    if (!schemaFile.startsWith('@')) throw new Error(`${entry.id}: schemaRef must name a public package export`);
+    const schemaAbsPath = fileURLToPath(import.meta.resolve(schemaFile));
     try {
       await stat(schemaAbsPath);
     } catch {
@@ -182,7 +170,10 @@ function orderIndex(id) {
  *  claims against the tree, and assembles catalog.json's shape. Never writes
  *  anything -- publication and local readers decide what to do
  *  with the result. */
-export async function discoverCatalog({ generatedDate, observePages = false, fetchImpl, checkedAt } = {}) {
+export async function discoverCatalog({ generatedDate, observePages = false, fetchImpl, checkedAt, repositoryRoot = DEFAULT_REPOSITORY_ROOT, groupRoot = DEFAULT_GROUP_ROOT } = {}) {
+  if (!repositoryRoot || !groupRoot) throw new TypeError('authored catalog data requires explicit repositoryRoot and groupRoot');
+  const REPO_ROOT = path.resolve(repositoryRoot);
+  const GROUP_ROOT = path.resolve(groupRoot);
   // Source is held by game engineering, authored public publications and the
   // science gaming owner. Discover their current contents, not a list of app names.
   const owners = [
@@ -221,7 +212,7 @@ export async function discoverCatalog({ generatedDate, observePages = false, fet
     }
     seenIds.add(manifest.id);
 
-    await verifyEntry(manifest, materialized.verificationHomeDir);
+    await verifyEntry(manifest);
 
     const repoPath = path.relative(REPO_ROOT, homeDir).split(path.sep).join('/');
     // The authored hostname (or subdomain's established *.561.group address)
