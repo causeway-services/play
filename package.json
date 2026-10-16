@@ -12,18 +12,26 @@
     "dev": "npm run build && wrangler dev"
   },
   "dependencies": {
-    "@red-cup-engineering/arnold": "workspace:*",
-    "@red-cup-engineering/gaming": "workspace:*",
-    "@red-cup-engineering/web-page-tiling-engine": "workspace:*",
-    "@red-cup-engineering/static-site-publisher": "workspace:*",
-    "@red-cup-engineering/weiqi-engine": "workspace:*",
     "esbuild": "0.28.1",
-    "@red-cup-engineering/git-services-section": "workspace:*"
+    "@red-cup-engineering/git-source-reading-service": "0.1.0",
+    "@red-cup-engineering/arnold": "0.3.0",
+    "@red-cup-engineering/static-site-publisher": "0.1.16",
+    "@red-cup-engineering/weiqi-engine": "0.3.1",
+    "@red-cup-engineering/be-not-so-fearful": "0.1.0",
+    "@red-cup-engineering/casino-service-561-group": "0.1.0",
+    "@red-cup-engineering/crucible-561-group": "0.1.0",
+    "@red-cup-engineering/durante": "0.1.0",
+    "@red-cup-engineering/gambling-trainer-561-group": "0.1.0",
+    "@red-cup-engineering/onestone-561-group": "0.1.0",
+    "@red-cup-engineering/parlor-service-561-group": "0.1.0",
+    "@red-cup-engineering/solitaire-561-group": "0.1.0",
+    "@red-cup-engineering/stoke-561-group": "0.1.0",
+    "@red-cup-engineering/you-are-conscious-service": "0.1.0",
+    "@red-cup-engineering/gaming": "0.1.10",
+    "@red-cup-engineering/web-page-tiling-engine": "0.14.2"
   },
   "devDependencies": {
-    "wrangler": "4.123.0",
-    "@red-cup-engineering/solitaire-561-group": "workspace:*",
-    "@red-cup-engineering/parlor-service-561-group": "workspace:*"
+    "wrangler": "4.123.0"
   },
   "engines": {
     "node": ">=24"

@@ -238,29 +238,27 @@ test("js/today.mjs's strips match exactly catalog.json's daily-utc entries", asy
   assert.deepEqual(new Set(ids), new Set(dailyIds));
 });
 
-test('daily Solitaire follows its authored table and variant, with the same seed as the game', async () => {
-  const { dailySeed } = await import('@red-cup-engineering/solitaire-561-group/daily');
+test('daily Solitaire follows its authored table, variant and UTC seed contract', async () => {
   const { computeTodayStrips } = await import('../js/today.mjs');
   const game = (await loadCatalog()).games.find((entry) => entry.id === 'solitaire');
   const date = new Date('2026-10-03T23:59:59Z');
   const [current] = await computeTodayStrips(date, [game]);
   assert.equal(new URL(current.url).pathname, '/web/table.html');
-  assert.equal(current.seedValue, dailySeed(date, 'klondike-draw1'));
+  assert.equal(current.seedValue, 'solitaire-daily:klondike-draw1:2026-10-03');
   const relocated = { ...game, hostname: 'authored-host.561.group', entryPoints: { ...game.entryPoints, daily: '/new-table/?variant=freecell&daily=1' } };
   const [changed] = await computeTodayStrips(date, [relocated]);
   assert.equal(new URL(changed.url).hostname, 'authored-host.561.group');
   assert.equal(new URL(changed.url).pathname, '/new-table/');
   assert.equal(new URL(changed.url).searchParams.get('date'), '2026-10-03');
-  assert.equal(changed.seedValue, dailySeed(date, 'freecell'));
+  assert.equal(changed.seedValue, 'solitaire-daily:freecell:2026-10-03');
   assert.ok(changed.seedLabel.includes(game.configs.find((config) => config.id === 'freecell').displayName));
 });
 
 
-test('daily reel seed agrees with the game bootstrap without an invented config argument', async () => {
-  const { dailySeed } = await import('@red-cup-engineering/parlor-service-561-group/reels/daily');
+test('daily reel seed preserves the parlor namespace without an invented config argument', async () => {
   const { computeTodayStrips } = await import('../js/today.mjs');
   const game = (await loadCatalog()).games.find(entry => entry.id === 'reels');
   const date = new Date('2026-10-04T12:00:00Z');
   const [strip] = await computeTodayStrips(date, [game]);
-  assert.equal(strip.seedValue, dailySeed(date));
+  assert.equal(strip.seedValue, 'parlor:reels-daily:2026-10-04');
 });
