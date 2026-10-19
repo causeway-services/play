@@ -2,12 +2,79 @@ import { shelfValues } from '../js/catalog.mjs';
 
 
 
-// House ad server (@red-cup-engineering/web-advertising-system-engineering-services-section), v0
-// served at ads.561.group. The footer slot fetches its creative
-// client-side, at property="play-561-group", so it self-excludes and
-// never advertises play.561.group on its own page.
-const HOUSE_AD_FOOTER = `<div id="house-ad-footer" data-slot="footer" data-property="play-561-group"></div>
-  <script>(function(){var s="footer",p="play-561-group",el=document.getElementById("house-ad-footer"),base="https://ads.561.group";fetch(base+"/ad?slot="+s+"&property="+p).then(function(r){return r.ok?r.json():null;}).then(function(d){if(!d||!d.creative||!el)return;var a=document.createElement("a");a.href=base+"/click?slot="+s+"&property="+p+"&creative="+encodeURIComponent(d.creative.id);a.rel="sponsored noopener noreferrer";a.textContent=d.creative.title+" -- "+d.creative.body;el.appendChild(a);}).catch(function(){});})();</script>`;
+// First-party Play receiver of Red Cup's existing contextual house advertising
+// protocol. The catalog, admission, redirect and aggregation still belong to
+// the original ads.561.group service. No reader identifier or cookies.
+function mountPlayHouseAdFooter() {
+  const el = document.getElementById("house-ad-footer");
+  if (!el) return;
+  const { adServer, slot, property, context } = el.dataset;
+  if (!adServer || !slot || !property || !context) return;
+  let origin;
+  try {
+    const url = new URL(adServer);
+    if (url.protocol !== "https:" || url.origin !== "https://ads.561.group" ||
+        url.username || url.password || url.search || url.hash || url.pathname !== "/") return;
+    origin = url.origin;
+  } catch { return; }
+  const args = new URLSearchParams({ slot, property, context }).toString();
+  fetch(origin + "/ad?" + args, { credentials: "omit" })
+    .then(response => response.ok ? response.json() : null)
+    .then(data => {
+      const creative = data?.creative;
+      // This slot has first-party house authority only. Reject third-party
+      // sponsored/affiliate creatives rather than falsely labeling them.
+      if (!creative || creative.relationship !== "house" ||
+          typeof creative.id !== "string" || !/^[A-Za-z0-9_-]+$/u.test(creative.id) ||
+          typeof creative.title !== "string" || !creative.title.trim()) return;
+      const label = document.createElement("span");
+      label.className = "ad-slot__label";
+      label.textContent = "From the publisher";
+      el.appendChild(label);
+      const anchor = document.createElement("a");
+      anchor.href = origin + "/click?" + args + "&creative=" + encodeURIComponent(creative.id);
+      anchor.rel = "noopener noreferrer";
+      const title = document.createElement("strong");
+      title.textContent = creative.title;
+      anchor.appendChild(title);
+      if (typeof creative.body === "string" && creative.body.trim())
+        anchor.appendChild(document.createTextNode(" — " + creative.body));
+      el.appendChild(anchor);
+      // A fetched creative is not an impression: optional unsigned browser
+      // telemetry records a visible opportunity, never a billable view.
+      if (typeof IntersectionObserver !== "function") return;
+      let visible = false, sent = false, pending = null;
+      const cancel = () => { if (pending !== null) clearTimeout(pending); pending = null; };
+      const submit = () => {
+        pending = null;
+        if (sent || !visible || document.visibilityState !== "visible") return;
+        sent = true;
+        fetch(origin + "/view?" + args + "&creative=" + encodeURIComponent(creative.id),
+          { method: "POST", credentials: "omit", keepalive: true })
+          .catch(() => { /* Optional telemetry is not a customer purchase. */ });
+      };
+      const schedule = () => {
+        if (!sent && pending === null && visible && document.visibilityState === "visible")
+          pending = setTimeout(submit, 1000);
+      };
+      const observer = new IntersectionObserver(entries => {
+        const entry = entries.find(item => item.target === el);
+        if (!entry) return;
+        visible = entry.isIntersecting && entry.intersectionRatio >= 0.5;
+        if (visible) schedule(); else cancel();
+      }, { threshold: [0, 0.5] });
+      observer.observe(el);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") schedule(); else cancel();
+      });
+    }).catch(() => { /* No ad is safer than an inaccurate ad. */ });
+}
+
+const HOUSE_AD_FOOTER = `<aside id="house-ad-footer" class="ad-slot ad-slot--house"
+  aria-label="From the publisher" data-slot="footer"
+  data-property="play-561-group" data-context="games"
+  data-ad-server="https://ads.561.group/"></aside>
+  <script>(${mountPlayHouseAdFooter.toString()})();</script>`;
 
 const MARK_SVG = `<svg class="mark" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <ellipse cx="24" cy="24" rx="18" ry="11"/>
@@ -150,6 +217,7 @@ export function todayHtml(gridFragment, date) {
       <p>
         <a href="index.html">&larr; Back to the shelf</a>
       </p>
+      ${HOUSE_AD_FOOTER}
     </div>
   </footer>
 
