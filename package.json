@@ -27,8 +27,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/causeway-services/public-media-services-section.git",
-    "directory": "services/public-games-services-section/services/public-web-games-services-section/sites/play.561.group"
+    "url": "git+https://github.com/causeway-services/play.git"
   },
   "exports": {
     "./catalog": "./src/discover-catalog.mjs",
