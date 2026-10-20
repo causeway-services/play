@@ -1,5 +1,11 @@
 # play.561.group
 
+## Voluntary sustaining support
+
+Play is a public 561 Group games project. If this free-to-use software is useful to you, you can [support the Group's public research, games, and reusable infrastructure for USD $10 per month](https://buy.stripe.com/28E28s1b4gJcb2Y3Io5EY02) using its existing Stripe-hosted sustaining-support checkout. Support renews monthly until canceled, is optional, and provides no extra access, editorial influence, or charitable tax deduction. [Read the existing terms and confidential help route](https://github.com/561-group/561.group#sustain-the-public-commons) before subscribing.
+
+This is a repository-visible first-party funding route; it does not assert that `play.561.group`, the separate house-ad server, or its advertising campaign has deployed, that anyone has seen the link, or that a payment has occurred.
+
 ## Current source composition
 
 This complete application lives under Public Media's declared Public Games child.
