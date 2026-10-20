@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import { renderTufteFragment } from '@red-cup-engineering/web-page-tiling-engine';
+import { TUFTE_TOUCH_STYLES } from '@red-cup-engineering/web-page-tiling-engine/theme';
 import { discoverCatalog } from './discover-catalog.mjs';
 import { catalogModel } from '../js/catalog.mjs';
 import { computeTodayModel } from '../js/today.mjs';
@@ -15,6 +16,7 @@ export async function publishShelf({ sources, observePages = false, fetchImpl, d
   const daily = await computeTodayModel(date, entries);
   const artifacts = [
     { path: 'catalog.json', body: json, source: 'authored-game-records' },
+    { path: 'css/tufte-touch.css', body: TUFTE_TOUCH_STYLES, source: 'tufte-touch-contract' },
     { path: 'index.html', body: indexHtml(renderTufteFragment(catalogModel(entries)), entries), source: 'game-shelf' },
     { path: 'today.html', body: todayHtml(renderTufteFragment(daily), catalog.generated), source: 'daily-seeds' },
   ];
