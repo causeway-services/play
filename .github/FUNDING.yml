@@ -1,0 +1,5 @@
+# Optional first-party sustaining support for 561 Group public research, games and reusable source.
+# Actual recurring charge: USD $10/month until canceled; no paid access, editorial influence or tax deduction.
+# Terms and contact: https://github.com/561-group/561.group#sustain-the-public-commons
+# This points to the Group's existing authorized Stripe hosted checkout, not a new product or merchant.
+custom: "https://buy.stripe.com/28E28s1b4gJcb2Y3Io5EY02"
