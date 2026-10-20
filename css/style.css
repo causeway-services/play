@@ -599,3 +599,60 @@ footer.site-footer {
 [hidden] { display: none !important; }
 .availability-note { font-size: .85rem; color: var(--fg-muted); }
 .headless-interface code { display: block; margin-top: .5rem; overflow-wrap: anywhere; }
+
+
+/* Game-shelf mobile receiver of TUFTE_TOUCH_STYLES: application chrome and
+ * safe areas belong here, not to the semantic tiling engine. Keep real links,
+ * native controls and player zoom. */
+@media (pointer:coarse) {
+  .today-nav-link, .play-link[href], .status-filter button, #today-refresh,
+  .controls input[type="search"], .shelf-filter-label select {
+    min-height:44px;
+    touch-action:manipulation;
+  }
+}
+@media (max-width:40rem) {
+  header.site-header {
+    padding:max(1rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) 1rem max(1rem,env(safe-area-inset-left));
+  }
+  main {
+    min-width:0;
+    padding:1rem max(1rem,env(safe-area-inset-right)) max(2rem,env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left));
+  }
+  .controls {
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    align-items:stretch;
+  }
+  .controls input[type="search"] {
+    min-width:0;
+    width:100%;
+    flex-basis:auto;
+    font-size:1rem;
+  }
+  .status-filter {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  .status-filter button {
+    min-width:0;
+    min-height:44px;
+    padding:.5rem .25rem;
+  }
+  .shelf-filter-label {
+    justify-content:space-between;
+  }
+  .shelf-filter-label select {
+    max-width:75%;
+    min-height:44px;
+  }
+  .tufte-tile { padding:1rem; }
+  .card-actions { align-items:stretch; }
+  .play-link[href] {
+    min-height:44px;
+    justify-content:center;
+    flex:1 1 100%;
+  }
+  .subdomain-hint { overflow-wrap:anywhere; }
+  .footer-inner { min-width:0; }
+}
