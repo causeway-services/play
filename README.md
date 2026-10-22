@@ -1,5 +1,12 @@
 # play.561.group
 
+<!-- 561-group-standards:badges:start -->
+[![Causeway Services](https://img.shields.io/badge/561%20Group-Causeway%20Services-115e69)](https://github.com/causeway-services)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-115e69)](LICENSE)
+[![Indigenous data: CARE](https://img.shields.io/badge/Indigenous%20data-CARE-4b6f44)](https://github.com/causeway-services/.github/blob/main/GOVERNANCE.md)
+[![Tips welcome](https://img.shields.io/badge/tips-welcome-d4a017)](https://github.com/561-group/.github/blob/main/TIPS.md)
+<!-- 561-group-standards:badges:end -->
+
 ## Voluntary sustaining support
 
 Play is a public 561 Group games project. If this free-to-use software is useful to you, you can [support the Group's public research, games, and reusable infrastructure for USD $10 per month](https://buy.stripe.com/28E28s1b4gJcb2Y3Io5EY02) using its existing Stripe-hosted sustaining-support checkout. Support renews monthly until canceled, is optional, and provides no extra access, editorial influence, or charitable tax deduction. [Read the existing terms and confidential help route](https://github.com/561-group/561.group#sustain-the-public-commons) before subscribing.
