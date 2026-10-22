@@ -111,7 +111,7 @@ export async function computeTodayStrips(date, entries = []) {
 
 function todayStripBodyHtml(strip) {
   const glyph = GLYPHS[strip.id] || FALLBACK_GLYPH;
-  const playLink = `<a class="play-link" href="${esc(strip.url)}">${EXTERNAL_LINK_ICON} Open ${esc(strip.name)}</a>`;
+  const playLink = `<a class="play-link" data-tufte-control href="${esc(strip.url)}">${EXTERNAL_LINK_ICON} Open ${esc(strip.name)}</a>`;
   const pageStatus = publicationPageStatus(strip.game);
   return `
     <div class="strip-head">

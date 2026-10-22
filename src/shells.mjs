@@ -96,9 +96,10 @@ export function indexHtml(gridFragment, entries = []) {
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>play.561.group -- 561 Group games catalog</title>
   <meta name="description" content="Find 561 Group games and courses, their browser entry pages, and their terminal or API interfaces." />
+  <link rel="stylesheet" href="css/tufte-touch.css" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="chrome/shelf-chrome.css" />
   <link rel="icon" href="favicon.svg" />
@@ -167,9 +168,10 @@ export function todayHtml(gridFragment, date) {
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Today -- play.561.group</title>
   <meta name="description" content="Shared UTC daily seeds and game entry links." />
+  <link rel="stylesheet" href="css/tufte-touch.css" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="chrome/shelf-chrome.css" />
   <link rel="icon" href="favicon.svg" />
