@@ -8,8 +8,9 @@
     "serve": "wrangler dev",
     "shelf": "node scripts/shelf-browser.mjs",
     "test": "node --test test/*.test.mjs",
-    "deploy": "npm run build && wrangler deploy",
-    "dev": "npm run build && wrangler dev"
+    "standards": "node scripts/apply-web-standards.mjs public standards.config.mjs",
+    "deploy": "npm run build && npm run standards && wrangler deploy",
+    "dev": "npm run build && npm run standards && wrangler dev"
   },
   "dependencies": {
     "@red-cup-engineering/arnold": "workspace:*",
