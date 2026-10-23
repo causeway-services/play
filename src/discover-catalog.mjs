@@ -24,8 +24,11 @@ export async function observeBrowserPages(games, { fetchImpl = fetch, checkedAt 
           signal: AbortSignal.timeout(5000),
         });
         const html = /^text\/html(?:;|$)/i.test(response.headers.get('content-type') ?? '');
-        availability = { state: response.ok && html ? 'reachable' : 'unavailable', url, checkedAt, httpStatus: response.status };
+        // An off-origin landing page is not evidence that the authored game is reachable.
+        const offOrigin = Boolean(response.url && new URL(response.url).origin !== new URL(url).origin);
+        availability = { state: response.ok && html && !offOrigin ? 'reachable' : 'unavailable', url, checkedAt, httpStatus: response.status };
         if (response.url && response.url !== url) availability.finalUrl = response.url;
+        if (offOrigin) availability.reason = 'off-origin-redirect';
         await response.body?.cancel();
       } catch {
         availability = { state: 'unavailable', url, checkedAt, reason: 'request-failed' };
