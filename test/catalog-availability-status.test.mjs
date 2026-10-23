@@ -79,6 +79,7 @@ test('publication observations distinguish reached HTML, HTTP refusals, wrong me
     fetchImpl: async (url, options) => {
       called.push(url);
       assert.equal(options.headers.accept, 'text/html');
+      assert.equal(options.redirect, 'manual', 'availability observer must refuse automatic redirect egress');
       const observation = responses.get(url);
       assert.ok(observation, 'only authored browser entrances can be requested');
       if (observation.status === null) throw new Error('synthetic network refusal');
@@ -102,7 +103,7 @@ test('publication observations distinguish reached HTML, HTTP refusals, wrong me
     assert.equal(catalogEntryToTile(actual[index]).confidence, expected === 'reachable' ? 'high' : 'low');
   }
   assert.equal(actual[6].availability.reason, 'off-origin-redirect');
-  assert.equal(actual[6].availability.finalUrl, 'https://external.example/landing');
+  assert.equal(actual[6].availability.finalUrl, undefined, 'public projections must not expose unrelated redirect destinations');
   assert.equal(actual[7].availability.reason, 'request-failed');
   assert.equal(actual[8].availability, undefined);
 });
