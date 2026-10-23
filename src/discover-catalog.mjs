@@ -60,7 +60,10 @@ export async function observeBrowserPages(games, { fetchImpl = fetch, checkedAt 
         const html = /^text\/html(?:;|$)/i.test(response?.headers.get('content-type') ?? '');
         availability = { state: response?.ok && html && !offOrigin ? 'reachable' : 'unavailable',
           url, checkedAt, ...(lastStatus === undefined ? {} : { httpStatus: lastStatus }) };
-        if (current.href !== origin.href) availability.finalUrl = current.href;
+        // A same-origin redirect may carry a one-use code or private query.
+        // Observe its HTML, but never copy a query-bearing destination into
+        // the public catalog's finalUrl projection.
+        if (current.href !== origin.href && !current.search) availability.finalUrl = current.href;
         if (offOrigin) reason = 'off-origin-redirect';
         if (reason) availability.reason = reason;
         await response?.body?.cancel();
