@@ -52,13 +52,17 @@ export function catalogCardBodyHtml(entry) {
   const actionLink = hasBrowser(entry)
     ? `<a class="play-link" href="${esc(playUrl(entry))}">${EXTERNAL_LINK_ICON} ${browserAvailable(entry) ? 'Open' : 'Visit'} ${esc(entry.displayName)}</a>`
     : '<span class="play-link">No browser entry</span>';
-  const pageStatus = entry.availability?.state === 'reachable' ? 'Page reached' : entry.availability?.state === 'unavailable' ? 'Page unavailable' : 'Page not checked';
+  // Author-reported playability and observed HTTP reachability are different facts.
+  // A default build does not probe remote pages; make that uncertainty visible.
+  const pageState = hasBrowser(entry) ? entry.availability?.state : null;
+  const pageStatus = pageState === 'reachable' ? 'Page reached' : pageState === 'unavailable' ? 'Page unavailable' : 'Page not checked';
 
   return `
     <div class="card-head"><span class="card-glyph">${glyph}</span></div>
     <p class="desc">${esc(entry.description)}</p>
     <div class="badges">
       <span class="badge ${playable ? 'playable' : 'in-development'}">${statusLabel(entry.status)}</span>
+      ${hasBrowser(entry) ? `<span class="badge availability-${pageState === 'reachable' ? 'reachable' : pageState === 'unavailable' ? 'unavailable' : 'unchecked'}">${pageStatus}</span>` : ''}
       ${headlessBadge}
     </div>
     ${hasHeadless(entry) ? `<details class="headless-interface"><summary>Read the API or terminal interface</summary><code>${esc(entry.entryPoints.headless)}</code></details>` : ''}
