@@ -1,0 +1,53 @@
+name: Play native availability receiving
+
+# Source-only receiving for the existing browser-shelf producer. This does
+# not build/deploy a website, probe customer hosts, or claim game completion.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "js/catalog.mjs"
+      - "js/glyphs.mjs"
+      - "src/discover-catalog.mjs"
+      - "test/catalog-availability-status.test.mjs"
+      - "test/catalog-source-selection.test.mjs"
+      - "test/router-wiring.test.mjs"
+      - ".github/workflows/native-availability.yml"
+  pull_request:
+    paths:
+      - "js/catalog.mjs"
+      - "js/glyphs.mjs"
+      - "src/discover-catalog.mjs"
+      - "test/catalog-availability-status.test.mjs"
+      - "test/catalog-source-selection.test.mjs"
+      - "test/router-wiring.test.mjs"
+      - ".github/workflows/native-availability.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: play-availability-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24.2.0"
+          package-manager-cache: false
+      - name: Check original producer and regression source
+        run: |
+          node --version
+          node --check js/catalog.mjs
+          node --check src/discover-catalog.mjs
+          node --check test/catalog-availability-status.test.mjs
+      - name: Exercise bounded native source and refusal contracts
+        run: node --test test/catalog-availability-status.test.mjs test/catalog-source-selection.test.mjs test/router-wiring.test.mjs

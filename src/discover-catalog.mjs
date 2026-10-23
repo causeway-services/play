@@ -6,7 +6,11 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { playUrl, hasBrowser } from '../js/catalog.mjs';
 
-/** Observe an HTML entry page; HTTP success is not a game-operation proof. */
+/** Observe an HTML entry page; HTTP success is not a game-operation proof.
+ * Automatic redirects can contact a foreign origin before a returned page
+ * is classified. Follow only bounded same-origin redirects without revealing
+ * a foreign Location URL in the public catalog.
+ */
 export async function observeBrowserPages(games, { fetchImpl = fetch, checkedAt = new Date().toISOString() } = {}) {
   let next = 0;
   const observations = new Array(games.length);
@@ -19,14 +23,50 @@ export async function observeBrowserPages(games, { fetchImpl = fetch, checkedAt 
       const url = playUrl(game);
       let availability;
       try {
-        const response = await fetchImpl(url, {
-          headers: { accept: 'text/html', 'user-agent': '561-Group-Shelf/1.0' },
-          signal: AbortSignal.timeout(5000),
-        });
-        const html = /^text\/html(?:;|$)/i.test(response.headers.get('content-type') ?? '');
-        availability = { state: response.ok && html ? 'reachable' : 'unavailable', url, checkedAt, httpStatus: response.status };
-        if (response.url && response.url !== url) availability.finalUrl = response.url;
-        await response.body?.cancel();
+        const origin = new URL(url);
+        if (origin.protocol !== 'https:' || origin.username || origin.password)
+          throw new TypeError('untrusted game address');
+        const signal = AbortSignal.timeout(5000);
+        let current = origin;
+        let response;
+        let lastStatus;
+        let reason;
+        // Three same-origin redirects preserve / -> /web/ game entrances.
+        // Manual handling refuses off-origin hops before any second request.
+        for (let hops = 0; hops <= 3; hops++) {
+          response = await fetchImpl(current.href, {
+            redirect: 'manual',
+            headers: { accept: 'text/html', 'user-agent': '561-Group-Shelf/1.0' },
+            signal,
+          });
+          lastStatus = response.status;
+          if (![301, 302, 303, 307, 308].includes(response.status)) break;
+          const location = response.headers.get('location');
+          await response.body?.cancel();
+          response = undefined;
+          if (!location) { reason = 'redirect-missing-location'; break; }
+          let destination;
+          try { destination = new URL(location, current); }
+          catch { reason = 'invalid-redirect'; break; }
+          if (destination.protocol !== 'https:' || destination.origin !== origin.origin
+            || destination.username || destination.password || destination.hash) {
+            reason = 'off-origin-redirect';
+            break;
+          }
+          if (hops === 3) { reason = 'redirect-limit'; break; }
+          current = destination;
+        }
+        const offOrigin = Boolean(response?.url && new URL(response.url).origin !== origin.origin);
+        const html = /^text\/html(?:;|$)/i.test(response?.headers.get('content-type') ?? '');
+        availability = { state: response?.ok && html && !offOrigin ? 'reachable' : 'unavailable',
+          url, checkedAt, ...(lastStatus === undefined ? {} : { httpStatus: lastStatus }) };
+        // A same-origin redirect may carry a one-use code or private query.
+        // Observe its HTML, but never copy a query-bearing destination into
+        // the public catalog's finalUrl projection.
+        if (current.href !== origin.href && !current.search) availability.finalUrl = current.href;
+        if (offOrigin) reason = 'off-origin-redirect';
+        if (reason) availability.reason = reason;
+        await response?.body?.cancel();
       } catch {
         availability = { state: 'unavailable', url, checkedAt, reason: 'request-failed' };
       }
