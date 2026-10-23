@@ -4,6 +4,8 @@ name: Play native availability receiving
 # not build/deploy a website, probe customer hosts, or claim game completion.
 on:
   push:
+    branches:
+      - main
     paths:
       - "js/catalog.mjs"
       - "js/glyphs.mjs"
