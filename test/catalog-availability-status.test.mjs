@@ -107,3 +107,46 @@ test('publication observations distinguish reached HTML, HTTP refusals, wrong me
   assert.equal(actual[7].availability.reason, 'request-failed');
   assert.equal(actual[8].availability, undefined);
 });
+
+test('observed redirects preserve local game entrances without reaching unrelated hosts', async () => {
+  const games = ['same', 'foreign', 'loop', 'response']
+    .map(id => ({ ...browserGame, id, hostname: id + '.561.group' }));
+  const called = [];
+  let closed = 0;
+  const reply = (url, status, location, actualUrl = url) => ({
+    ok: status >= 200 && status < 300, status, url: actualUrl,
+    headers: { get: field => field === 'location' ? location
+      : field === 'content-type' ? 'text/html' : null },
+    body: { cancel: async () => { closed++; } },
+  });
+  const result = await observeBrowserPages(games, {
+    checkedAt: '2026-10-23T22:00:00Z',
+    fetchImpl: async (url, options) => {
+      called.push(url);
+      assert.equal(options.redirect, 'manual');
+      if (url === 'https://same.561.group/')
+        return reply(url, 302, '/web/index.html');
+      if (url === 'https://same.561.group/web/index.html')
+        return reply(url, 200);
+      if (url === 'https://foreign.561.group/')
+        return reply(url, 302, 'https://elsewhere.invalid/landing?opaque=private-fixture');
+      if (url.startsWith('https://loop.561.group/'))
+        return reply(url, 302, '/loop');
+      if (url === 'https://response.561.group/')
+        return reply(url, 200, null, 'https://elsewhere.invalid/landing?opaque=private-fixture');
+      throw new Error('unexpected redirect attempt');
+    },
+  });
+  assert.equal(result[0].availability.state, 'reachable');
+  assert.equal(result[0].availability.finalUrl, 'https://same.561.group/web/index.html');
+  assert.equal(result[1].availability.state, 'unavailable');
+  assert.equal(result[1].availability.reason, 'off-origin-redirect');
+  assert.equal(result[1].availability.finalUrl, undefined);
+  assert.equal(result[2].availability.reason, 'redirect-limit');
+  assert.equal(result[3].availability.reason, 'off-origin-redirect');
+  assert.equal(result[3].availability.finalUrl, undefined);
+  assert.equal(called.length, 8, '2 local + 1 foreign refusal + 4 loop limit + 1 final refusal');
+  assert.ok(called.every(url => new URL(url).hostname.endsWith('.561.group')));
+  assert.ok(!JSON.stringify(result).includes('private-fixture'));
+  assert.equal(closed, called.length);
+});
