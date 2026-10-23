@@ -109,7 +109,7 @@ test('publication observations distinguish reached HTML, HTTP refusals, wrong me
 });
 
 test('observed redirects preserve local game entrances without reaching unrelated hosts', async () => {
-  const games = ['same', 'foreign', 'loop', 'response']
+  const games = ['same', 'foreign', 'loop', 'response', 'query']
     .map(id => ({ ...browserGame, id, hostname: id + '.561.group' }));
   const called = [];
   let closed = 0;
@@ -134,6 +134,10 @@ test('observed redirects preserve local game entrances without reaching unrelate
         return reply(url, 302, '/loop');
       if (url === 'https://response.561.group/')
         return reply(url, 200, null, 'https://elsewhere.invalid/landing?opaque=private-fixture');
+      if (url === 'https://query.561.group/')
+        return reply(url, 302, '/web/index.html?auth_code=synthetic-private-code');
+      if (url === 'https://query.561.group/web/index.html?auth_code=synthetic-private-code')
+        return reply(url, 200);
       throw new Error('unexpected redirect attempt');
     },
   });
@@ -145,8 +149,14 @@ test('observed redirects preserve local game entrances without reaching unrelate
   assert.equal(result[2].availability.reason, 'redirect-limit');
   assert.equal(result[3].availability.reason, 'off-origin-redirect');
   assert.equal(result[3].availability.finalUrl, undefined);
-  assert.equal(called.length, 8, '2 local + 1 foreign refusal + 4 loop limit + 1 final refusal');
+  assert.equal(result[4].availability.state, 'reachable',
+    'a same-origin query redirect can still produce an HTML reachability witness');
+  assert.equal(result[4].availability.finalUrl, undefined,
+    'potentially private redirected query never becomes public catalog metadata');
+  assert.equal(called.length, 10, '2 local + 1 foreign refusal + 4 loop limit + 1 final refusal + 2 query hops');
   assert.ok(called.every(url => new URL(url).hostname.endsWith('.561.group')));
   assert.ok(!JSON.stringify(result).includes('private-fixture'));
+  assert.ok(!JSON.stringify(result).includes('synthetic-private-code'));
+
   assert.equal(closed, called.length);
 });
